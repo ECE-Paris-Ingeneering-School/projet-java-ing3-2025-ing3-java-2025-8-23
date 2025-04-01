@@ -1,2 +1,3 @@
 public class Shopping {
-}ouiouibaguette
+    private int tamere;
+}
