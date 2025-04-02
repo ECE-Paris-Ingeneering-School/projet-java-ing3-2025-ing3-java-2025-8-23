@@ -34,6 +34,7 @@ public class PageAccueil extends JFrame{
             footerLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
             mainPanel.add(footerLabel, BorderLayout.SOUTH);
 
+            
             add(mainPanel);
             setVisible(true);
         }
