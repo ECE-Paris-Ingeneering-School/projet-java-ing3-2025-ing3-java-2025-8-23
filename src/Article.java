@@ -13,6 +13,7 @@ public class Article {
         this.marque = marque;
         this.id = id;
     }
+    //ceci est un test
 void afficher(Article article) {
         System.out.println();
 }
