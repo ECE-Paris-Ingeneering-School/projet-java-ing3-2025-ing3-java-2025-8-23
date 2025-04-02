@@ -6,4 +6,15 @@ public class Article {
     private String marque;
     private int id;
 
+    public Article (String nom, float prix_article, float prix_remise, String marque, int id) {
+        this.nom = nom;
+        this.prix_article = prix_article;
+        this.prix_remise = prix_remise;
+        this.marque = marque;
+        this.id = id;
+    }
+void afficher(Article article) {
+        System.out.println();
+}
+
 }
