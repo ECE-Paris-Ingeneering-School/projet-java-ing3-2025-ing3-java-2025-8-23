@@ -13,8 +13,7 @@ public class Article {
         this.marque = marque;
         this.id = id;
     }
-void afficher(Article article) {
-        System.out.println();
-}
+
+
 
 }

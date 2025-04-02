@@ -1,3 +1,5 @@
+import javax.swing.*;
+
 public class Shopping {
-    private int tamere;
+
 }
