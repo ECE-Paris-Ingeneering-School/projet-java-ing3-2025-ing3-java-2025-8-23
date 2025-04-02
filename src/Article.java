@@ -12,8 +12,9 @@ public class Article {
         this.prix_remise = prix_remise;
         this.marque = marque;
         this.id = id;
-
-
     }
+void afficher(Article article) {
+        System.out.println();
+}
 
 }
