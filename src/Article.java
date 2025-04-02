@@ -13,6 +13,7 @@ public class Article {
         this.marque = marque;
         this.id = id;
 
+
     }
 
 }
