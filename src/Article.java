@@ -7,5 +7,5 @@ public class Article {
     private int id;
 g
 
-
+test
 }
