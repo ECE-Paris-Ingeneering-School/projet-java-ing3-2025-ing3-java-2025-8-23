@@ -16,7 +16,9 @@ public class PageAccueil extends JFrame{
             JLabel headerLabel = new JLabel("Bienvenue chez Rinted", JLabel.CENTER);
             headerLabel.setFont(new Font("Arial", Font.BOLD, 28));
             headerLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
+            mainPanel.setBackground(Color.LIGHT_GRAY);
             mainPanel.add(headerLabel, BorderLayout.NORTH);
+
 
             // Navigation Panel
             JPanel navPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
@@ -34,7 +36,8 @@ public class PageAccueil extends JFrame{
             footerLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
             mainPanel.add(footerLabel, BorderLayout.SOUTH);
 
-            
+
+
             add(mainPanel);
             setVisible(true);
         }
