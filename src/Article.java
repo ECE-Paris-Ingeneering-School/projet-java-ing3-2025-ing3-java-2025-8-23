@@ -5,7 +5,6 @@ public class Article {
     private float prix_remise;
     private String marque;
     private int id;
-g
 
 
 }
