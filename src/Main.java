@@ -1,7 +1,9 @@
-import javax.swing.*;
+import javax.swing.SwingUtilities;
 
 public class Main {
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new PageAccueil());
+        SwingUtilities.invokeLater(() -> {
+            new Catalogue().setVisible(true);
+        });
     }
 }
