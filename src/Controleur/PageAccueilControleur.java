@@ -2,6 +2,7 @@ package Controleur;
 
 import Vue.PageAccueil;
 import Vue.PagePrincipale;
+import Vue.PageInscription;
 import DAO.UtilisateurDAO;
 
 import javax.swing.*;
@@ -20,10 +21,18 @@ public class PageAccueilControleur {
     }
 
     private void initialiserControleur() {
+        // Action pour se connecter
         vueAccueil.getBoutonConnexion().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 authentifierUtilisateur();
+            }
+        });
+        // Action pour s'inscrire
+        vueAccueil.getBoutonInscription().addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ouvrirPageInscription();
             }
         });
     }
@@ -32,15 +41,18 @@ public class PageAccueilControleur {
         String adresseEmail = vueAccueil.getChampEmail().getText();
         String motDePasse = new String(vueAccueil.getChampMotDePasse().getPassword());
 
-        // Utilisation du DAO pour vérifier directement dans la base de données
+        // Vérification via la base de données
         if (utilisateurDAO.verifierIdentifiants(adresseEmail, motDePasse)) {
             JOptionPane.showMessageDialog(vueAccueil, "Connexion réussie !");
-            // Affichage de la page d'accueil principale
-            PagePrincipale pagePrincipale = new PagePrincipale();
-            pagePrincipale.setVisible(true);
-            vueAccueil.dispose();  // Fermer la fenêtre de connexion
+            new PagePrincipale().setVisible(true);
+            vueAccueil.dispose();
         } else {
             JOptionPane.showMessageDialog(vueAccueil, "Identifiants incorrects.", "Erreur", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private void ouvrirPageInscription() {
+        new PageInscription().setVisible(true);
+        vueAccueil.dispose();
     }
 }
