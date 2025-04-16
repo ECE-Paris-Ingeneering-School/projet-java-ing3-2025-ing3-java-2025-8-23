@@ -1,9 +1,9 @@
 package Controleur;
 
 import Vue.PageInscription;
+import Vue.PageAccueil;  // Retour à la page de connexion
 import DAO.UtilisateurDAO;
 import Modele.Utilisateur;
-import Vue.PageAccueil;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -30,32 +30,47 @@ public class PageInscriptionControleur {
 
     private void inscrireUtilisateur() {
         // Récupération des valeurs saisies
+        String prenom = vueInscription.getChampPrenom().getText();
+        String nom = vueInscription.getChampNom().getText();
         String email = vueInscription.getChampEmail().getText();
+        String adresse = vueInscription.getChampAdresse().getText();
         String motDePasse = new String(vueInscription.getChampMotDePasse().getPassword());
         String confirmerMotDePasse = new String(vueInscription.getChampConfirmerMotDePasse().getPassword());
-        String nom = vueInscription.getChampNom().getText();
-        String prenom = vueInscription.getChampPrenom().getText();
-        String telephone = vueInscription.getChampTelephone().getText();
-        String adresse = vueInscription.getChampAdresse().getText();
+
+        // Vérification que les champs ne sont pas vides
+        if (prenom.isEmpty() || nom.isEmpty() || email.isEmpty()
+                || adresse.isEmpty() || motDePasse.isEmpty()) {
+            JOptionPane.showMessageDialog(vueInscription,
+                    "Veuillez remplir tous les champs.",
+                    "Erreur",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
         // Vérification que les mots de passe correspondent
         if (!motDePasse.equals(confirmerMotDePasse)) {
-            JOptionPane.showMessageDialog(vueInscription, "Les mots de passe ne correspondent pas.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(vueInscription,
+                    "Les mots de passe ne correspondent pas.",
+                    "Erreur",
+                    JOptionPane.ERROR_MESSAGE);
             return;
         }
-        // Vous pouvez ajouter ici d'autres vérifications (ex. champs non vides)
 
-        // Création d'un objet Utilisateur avec les infos saisies
-        Utilisateur utilisateur = new Utilisateur(email, motDePasse, nom, prenom, telephone, adresse);
+        // Création de l'objet Utilisateur
+        Utilisateur utilisateur = new Utilisateur(prenom, nom, email, motDePasse, adresse);
 
-        // Appel de la méthode d'inscription dans le DAO
+        // Insertion via le DAO
         if (utilisateurDAO.inscrireUtilisateur(utilisateur)) {
-            JOptionPane.showMessageDialog(vueInscription, "Inscription réussie !");
+            JOptionPane.showMessageDialog(vueInscription,
+                    "Inscription réussie !");
             vueInscription.dispose();
-            // Après inscription, soit ouvrir la page de connexion, soit passer directement à la page principale
+            // Par exemple, retour à la page de connexion
             new PageAccueil().setVisible(true);
         } else {
-            JOptionPane.showMessageDialog(vueInscription, "L'inscription a échoué.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(vueInscription,
+                    "L'inscription a échoué. Veuillez réessayer.",
+                    "Erreur",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 }
