@@ -2,10 +2,10 @@
 -- version 5.1.2
 -- https://www.phpmyadmin.net/
 --
--- Hôte : localhost:3306
--- Généré le : mer. 02 avr. 2025 à 14:57
+-- Hôte : localhost:8889
+-- Généré le : mer. 16 avr. 2025 à 14:09
 -- Version du serveur : 5.7.24
--- Version de PHP : 8.0.1
+-- Version de PHP : 8.3.1
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Base de données : `db_shopping`
+-- Base de données : `shopping_db`
 --
 
 -- --------------------------------------------------------
@@ -71,12 +71,20 @@ CREATE TABLE `commande_articles` (
 CREATE TABLE `utilisateurs` (
   `id` int(11) NOT NULL,
   `prenom` varchar(100) NOT NULL,
+  `nom` varchar(100) NOT NULL,
   `email` varchar(255) NOT NULL,
   `mot_de_passe` varchar(255) NOT NULL,
   `adresse` text,
   `date_inscription` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `rang` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Déchargement des données de la table `utilisateurs`
+--
+
+INSERT INTO `utilisateurs` (`id`, `prenom`, `nom`, `email`, `mot_de_passe`, `adresse`, `date_inscription`, `rang`) VALUES
+(1, 'Quentin', '', 'megachberich@gmail.com', '1234', '11 Rue de strasbourg', '2025-04-14 12:29:29', 0);
 
 --
 -- Index pour les tables déchargées
@@ -136,7 +144,7 @@ ALTER TABLE `commande_articles`
 -- AUTO_INCREMENT pour la table `utilisateurs`
 --
 ALTER TABLE `utilisateurs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- Contraintes pour les tables déchargées
