@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 public class ConnectionFactory {
     // Modifiez l'URL, l'utilisateur et le mot de passe en fonction de votre configuration
-    private static final String URL = "jdbc:mysql://localhost:8889/shopping_db?serverTimezone=UTC";
+    private static final String URL = "jdbc:mysql://localhost:8889/db_shopping?serverTimezone=UTC";
     private static final String UTILISATEUR = "root";
     private static final String MOT_DE_PASSE = "root"; // Remplacez par votre mot de passe si nécessaire
 
