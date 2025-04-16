@@ -2,15 +2,15 @@ package Vue;
 
 import javax.swing.*;
 import java.awt.*;
-import Controleur.PageAccueilControleur;
+import Controleur.PageConnexionControleur;
 
-public class PageAccueil extends JFrame {
+public class PageConnexion extends JFrame {
     private JTextField champEmail;
     private JPasswordField champMotDePasse;
     private JButton boutonConnexion;
     private JButton boutonInscription;  // Bouton pour s'inscrire
 
-    public PageAccueil() {
+    public PageConnexion() {
         setTitle("Connexion - Boutique Shopping");
         setSize(400, 250);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -43,7 +43,7 @@ public class PageAccueil extends JFrame {
         add(panelPrincipal);
 
         // Instanciation du contrôleur de la page d'accueil
-        new PageAccueilControleur(this);
+        new PageConnexionControleur(this);
     }
 
     // Getters pour le contrôleur
@@ -63,7 +63,7 @@ public class PageAccueil extends JFrame {
     // Méthode main de test (si vous souhaitez lancer directement la page de connexion)
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            new PageAccueil().setVisible(true);
+            new PageConnexion().setVisible(true);
         });
     }
 }

@@ -12,15 +12,16 @@ public class PageInscription extends JFrame {
     private JPasswordField champMotDePasse;
     private JPasswordField champConfirmerMotDePasse;
     private JButton boutonInscription;
+    private JButton boutonRetour;  // Nouveau bouton pour revenir à la page de connexion
 
     public PageInscription() {
         setTitle("Inscription - Créer un compte");
-        setSize(400, 400);
+        setSize(400, 450);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // 7 lignes x 2 colonnes (1 ligne par champ + 1 pour le bouton)
-        JPanel panelFormulaire = new JPanel(new GridLayout(7, 2, 5, 5));
+        // Création du formulaire avec GridLayout pour les champs
+        JPanel panelFormulaire = new JPanel(new GridLayout(6, 2, 5, 5));
         panelFormulaire.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         panelFormulaire.add(new JLabel("Prénom :"));
@@ -47,18 +48,24 @@ public class PageInscription extends JFrame {
         champConfirmerMotDePasse = new JPasswordField();
         panelFormulaire.add(champConfirmerMotDePasse);
 
-        // Bouton d'inscription
+        // Panel pour les boutons
+        JPanel panelBoutons = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        boutonRetour = new JButton("Retour");
         boutonInscription = new JButton("S'inscrire");
-        panelFormulaire.add(new JLabel("")); // Pour aligner le bouton
-        panelFormulaire.add(boutonInscription);
+        panelBoutons.add(boutonRetour);
+        panelBoutons.add(boutonInscription);
 
-        add(panelFormulaire);
+        // Organisation globale : formulaire en haut, boutons en bas
+        Container container = getContentPane();
+        container.setLayout(new BorderLayout());
+        container.add(panelFormulaire, BorderLayout.CENTER);
+        container.add(panelBoutons, BorderLayout.SOUTH);
 
-        // Contrôleur
+        // Instanciation du contrôleur associé
         new PageInscriptionControleur(this);
     }
 
-    // Getters
+    // Getters pour les contrôleurs
     public JTextField getChampPrenom() {
         return champPrenom;
     }
@@ -76,6 +83,9 @@ public class PageInscription extends JFrame {
     }
     public JPasswordField getChampConfirmerMotDePasse() {
         return champConfirmerMotDePasse;
+    }
+    public JButton getBoutonRetour() {
+        return boutonRetour;
     }
     public JButton getBoutonInscription() {
         return boutonInscription;

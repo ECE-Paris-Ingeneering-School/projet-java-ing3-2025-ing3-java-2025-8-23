@@ -1,7 +1,7 @@
 package Controleur;
 
 import Vue.PageInscription;
-import Vue.PageAccueil;  // Retour à la page de connexion
+import Vue.PageConnexion;  // Assure-toi d'avoir renommé la page d'accueil en PageConnexion
 import DAO.UtilisateurDAO;
 import Modele.Utilisateur;
 
@@ -20,10 +20,18 @@ public class PageInscriptionControleur {
     }
 
     private void initialiserControleur() {
+        // Action pour le bouton "S'inscrire"
         vueInscription.getBoutonInscription().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 inscrireUtilisateur();
+            }
+        });
+        // Action pour le bouton "Retour"
+        vueInscription.getBoutonRetour().addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                retourPageConnexion();
             }
         });
     }
@@ -64,13 +72,20 @@ public class PageInscriptionControleur {
             JOptionPane.showMessageDialog(vueInscription,
                     "Inscription réussie !");
             vueInscription.dispose();
-            // Par exemple, retour à la page de connexion
-            new PageAccueil().setVisible(true);
+            // Retour à la page de connexion
+            new PageConnexion().setVisible(true);
         } else {
             JOptionPane.showMessageDialog(vueInscription,
                     "L'inscription a échoué. Veuillez réessayer.",
                     "Erreur",
                     JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    // Méthode appelée lors du clic sur "Retour"
+    private void retourPageConnexion() {
+        // Ferme la page d'inscription et ouvre la page de connexion
+        vueInscription.dispose();
+        new PageConnexion().setVisible(true);
     }
 }

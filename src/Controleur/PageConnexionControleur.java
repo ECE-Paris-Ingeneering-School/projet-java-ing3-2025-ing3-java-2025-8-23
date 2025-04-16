@@ -1,6 +1,6 @@
 package Controleur;
 
-import Vue.PageAccueil;
+import Vue.PageConnexion;
 import Vue.PagePrincipale;
 import Vue.PageInscription;
 import DAO.UtilisateurDAO;
@@ -9,12 +9,12 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class PageAccueilControleur {
+public class PageConnexionControleur {
 
-    private PageAccueil vueAccueil;
+    private PageConnexion vueAccueil;
     private UtilisateurDAO utilisateurDAO;
 
-    public PageAccueilControleur(PageAccueil vueAccueil) {
+    public PageConnexionControleur(PageConnexion vueAccueil) {
         this.vueAccueil = vueAccueil;
         this.utilisateurDAO = new UtilisateurDAO();
         initialiserControleur();
