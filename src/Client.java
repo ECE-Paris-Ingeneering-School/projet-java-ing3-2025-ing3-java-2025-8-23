@@ -3,6 +3,7 @@ public class Client {
     private String clientIdentifiant;
     private String clientMDP;
 
+
     // constructeur
     public Client (int clientId, String clientNom, String clientMail) {
         this.clientId = clientId;

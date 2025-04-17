@@ -1,7 +1,11 @@
-import javax.swing.*;
-
 public class Main {
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new PageAccueil());
+        try {
+            ClientDAO dao = new ClientDAO();
+            LoginView view = new LoginView();
+            new LoginControleur(view, dao);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
