@@ -2,6 +2,8 @@ package Vue;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class PagePrincipale extends JFrame {
     public PagePrincipale() {
@@ -13,27 +15,59 @@ public class PagePrincipale extends JFrame {
         // Disposition principale
         setLayout(new BorderLayout());
 
+
         // --- 1. Panel d'en-tête (Nord) ---
         JPanel panelEntete = new JPanel(new BorderLayout());
-        panelEntete.setBackground(new Color(255, 153, 0)); // Teinte orange pour rappeler un site e-commerce
+        panelEntete.setBackground(new Color(255, 153, 0)); // Teinte orange
 
-        // Logo (à gauche)
+        // --- Logo (à gauche) ---
         JLabel labelLogo = new JLabel("Ma Boutique");
         labelLogo.setFont(new Font("SansSerif", Font.BOLD, 24));
         labelLogo.setForeground(Color.WHITE);
         labelLogo.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         panelEntete.add(labelLogo, BorderLayout.WEST);
 
-        // Barre de recherche (au centre)
-        JTextField barreRecherche = new JTextField();
-        barreRecherche.setPreferredSize(new Dimension(400, 30));
-        panelEntete.add(barreRecherche, BorderLayout.CENTER);
+        // --- Centre : Barre de recherche + bouton rechercher ---
+        JPanel centerSearchPanel = new JPanel(new BorderLayout());
+        centerSearchPanel.setOpaque(false); // pour garder l’arrière-plan orange
 
-        // Bouton de recherche (à droite)
+        JTextField barreRecherche = new JTextField();
+        barreRecherche.setPreferredSize(new Dimension(300, 30));
+        centerSearchPanel.add(barreRecherche, BorderLayout.CENTER);
+
         JButton boutonRecherche = new JButton("Rechercher");
-        panelEntete.add(boutonRecherche, BorderLayout.EAST);
+        centerSearchPanel.add(boutonRecherche, BorderLayout.EAST);
+
+        panelEntete.add(centerSearchPanel, BorderLayout.CENTER);
+
+        // --- Droite : Boutons Panier + Déconnexion ---
+        JPanel rightButtonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        rightButtonPanel.setOpaque(false);
+
+        JButton btnPanier = new JButton("Mon Panier");
+        JButton btnDeconnexion = new JButton("Déconnexion");
+
+        rightButtonPanel.add(btnPanier);
+        rightButtonPanel.add(btnDeconnexion);
+
+        panelEntete.add(rightButtonPanel, BorderLayout.EAST);
+
+
+        // Action du bouton déconnexion
+        btnDeconnexion.addActionListener(e -> {
+            dispose();
+            SwingUtilities.invokeLater(() -> {
+                new PageConnexion().setVisible(true);
+            });
+        });
+        btnPanier.addActionListener(e -> {
+            dispose();  // ferme la page actuelle
+            SwingUtilities.invokeLater(() -> new Panier().setVisible(true));  // ouvre la page Panier
+        });
+
 
         add(panelEntete, BorderLayout.NORTH);
+
 
         // --- 2. Panneau de navigation (Ouest) ---
         JPanel panelNavigation = new JPanel();
@@ -42,7 +76,7 @@ public class PagePrincipale extends JFrame {
         panelNavigation.setBackground(new Color(240, 240, 240));
 
         // Liste fictive de catégories
-        String[] categories = {"Électronique", "Vêtements", "Livres", "Maison & Jardin", "Sports"};
+        String[] categories = {"Pantalons", "T-Shirt", "Sweat", "Chaussures", "Autres"};
         for (String categorie : categories) {
             JButton boutonCategorie = new JButton(categorie);
             boutonCategorie.setAlignmentX(Component.CENTER_ALIGNMENT);
