@@ -9,16 +9,10 @@ public class PageConnexion extends JFrame {
     private JPasswordField champMotDePasse;
     private JButton boutonConnexion;
     private JButton boutonInscription;
-    // Bouton pour s'inscrire
-
-    // Déclaration des boutons radio (à mettre en haut avec les autres attributs)
-    private JRadioButton radioOui;
-    private JRadioButton radioNon;
-
 
     public PageConnexion() {
         setTitle("Connexion - Boutique Shopping");
-        setSize(400, 250);
+        setSize(400, 200);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -28,7 +22,7 @@ public class PageConnexion extends JFrame {
         boutonConnexion = new JButton("Se connecter");
         boutonInscription = new JButton("S'inscrire");
 
-        // Utilisation d'un panel pour les champs de saisie
+        // Panel pour les champs de saisie
         JPanel panelChamps = new JPanel(new GridLayout(2, 2, 5, 5));
         panelChamps.add(new JLabel("Adresse Email :"));
         panelChamps.add(champEmail);
@@ -40,35 +34,15 @@ public class PageConnexion extends JFrame {
         panelBoutons.add(boutonConnexion);
         panelBoutons.add(boutonInscription);
 
-        // Panel pour la question "Êtes-vous administrateur ?"
-        JPanel panelAdmin = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
-        panelAdmin.setBorder(BorderFactory.createTitledBorder("Êtes-vous administrateur ?"));
-
-        radioOui = new JRadioButton("Oui");
-        radioNon = new JRadioButton("Non");
-        radioNon.setSelected(true); // Option par défaut
-
-        ButtonGroup groupeAdmin = new ButtonGroup();
-        groupeAdmin.add(radioOui);
-        groupeAdmin.add(radioNon);
-
-        panelAdmin.add(radioOui);
-        panelAdmin.add(radioNon);
-
-// Création d’un panel secondaire pour contenir les boutons + choix admin
-        JPanel panelSud = new JPanel(new BorderLayout());
-        panelSud.add(panelBoutons, BorderLayout.NORTH);
-        panelSud.add(panelAdmin, BorderLayout.SOUTH);
-
         // Organisation globale dans un panel principal
         JPanel panelPrincipal = new JPanel(new BorderLayout(10, 10));
         panelPrincipal.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         panelPrincipal.add(panelChamps, BorderLayout.CENTER);
-        panelPrincipal.add(panelSud, BorderLayout.SOUTH);
+        panelPrincipal.add(panelBoutons, BorderLayout.SOUTH);
 
-        add(panelPrincipal);
+        setContentPane(panelPrincipal);
 
-        // Instanciation du contrôleur de la page d'accueil
+        // Instanciation du contrôleur de la page de connexion
         new PageConnexionControleur(this);
     }
 
@@ -76,19 +50,20 @@ public class PageConnexion extends JFrame {
     public JTextField getChampEmail() {
         return champEmail;
     }
+
     public JPasswordField getChampMotDePasse() {
         return champMotDePasse;
     }
+
     public JButton getBoutonConnexion() {
         return boutonConnexion;
     }
+
     public JButton getBoutonInscription() {
         return boutonInscription;
     }
-    public boolean estAdminCoche() {return radioOui.isSelected();}
 
-
-    // Méthode main de test (si vous souhaitez lancer directement la page de connexion)
+    // Méthode main de test
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             new PageConnexion().setVisible(true);
