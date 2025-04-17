@@ -1,4 +1,4 @@
 package DAO;
 
-public class ArticlesDAO {oui
+public class ArticlesDAO {
 }
