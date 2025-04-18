@@ -11,7 +11,7 @@ public class ModeleImage {
             // Connexion à la base de données
             Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:8889/shopping", "root", "root");
 
-            String sql = "SELECT nom, image, prix FROM articles";
+            String sql = "SELECT nom, image, prix, marque FROM articles";
             PreparedStatement stmt = conn.prepareStatement(sql);
             ResultSet rs = stmt.executeQuery();
 
@@ -19,7 +19,8 @@ public class ModeleImage {
                 String nom = rs.getString("nom");
                 byte[] imageData = rs.getBytes("image");
                 double prix = rs.getDouble("prix");
-                produits.add(new ProduitImage(nom, imageData, prix));
+                String marque = rs.getString("marque");
+                produits.add(new ProduitImage(nom, imageData, prix, marque));
             }
 
             rs.close();
