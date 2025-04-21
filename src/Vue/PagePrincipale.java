@@ -240,4 +240,6 @@ public class PagePrincipale extends JFrame {
         panelContenu.revalidate();
         panelContenu.repaint();
     }
+
+    
 }
