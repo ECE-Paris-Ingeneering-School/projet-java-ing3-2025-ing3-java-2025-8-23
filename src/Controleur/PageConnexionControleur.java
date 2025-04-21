@@ -3,6 +3,7 @@ package Controleur;
 import Vue.PageConnexion;
 import Vue.PageInscription;
 import Vue.PagePrincipale;
+import Vue.PageAdmin;
 import DAO.UtilisateurDAO;
 import Modele.Utilisateur;
 import Utilitaires.Session;
@@ -12,8 +13,10 @@ import java.time.LocalDate;
 
 /**
  * Contrôleur de la page de connexion.
- * Gère l’authentification, la promotion automatique du rang,
- * et affiche un message de nouveaux avantages si besoin.
+ *  • Authentifie l’utilisateur
+ *  • Gère la promotion automatique 1→2
+ *  • Affiche un message d’avantages si promotion
+ *  • Dirige vers PageAdmin si rang=0, sinon PagePrincipale
  */
 public class PageConnexionControleur {
 
@@ -40,41 +43,46 @@ public class PageConnexionControleur {
         String email = vueConnexion.getChampEmail().getText();
         String mdp   = new String(vueConnexion.getChampMotDePasse().getPassword());
 
-        // 1) Récupération de l'utilisateur complet depuis la base
+        // 1) Récupérer l’utilisateur complet
         Utilisateur user = utilisateurDAO.seConnecter(email, mdp);
 
         if (user != null) {
             boolean vientDEtrePromu = false;
 
-            // 2) Promotion automatique si "nouveau client" (rang 1) et +1 mois depuis l'inscription
+            // 2) Promotion auto si rang=1 et +1 mois
             if (user.getRang() == 1
                     && user.getDateInscription().plusMonths(1).isBefore(LocalDate.now())) {
 
-                vientDEtrePromu = utilisateurDAO.mettreAJourRang(user.getId(), 2);
+                vientDEtrePromu =
+                        utilisateurDAO.mettreAJourRang(user.getId(), 2);
                 if (vientDEtrePromu) {
-                    // Rafraîchir l'objet utilisateur pour récupérer le nouveau rang
+                    // Rafraîchir l’objet user
                     user = utilisateurDAO.seConnecter(email, mdp);
                 }
             }
 
-            // 3) Stockage en session
+            // 3) Stocker en session
             Session.setUtilisateur(user);
 
             // 4) Message de connexion
             JOptionPane.showMessageDialog(vueConnexion, "Connexion réussie !");
 
-            // 5) Si promotion, afficher le message spécial
+            // 5) Si promotion, notifier des nouveaux avantages
             if (vientDEtrePromu) {
                 JOptionPane.showMessageDialog(
                         vueConnexion,
-                        "🎉 Félicitations! \nVous êtes désormais un ancien client\nVous bénéficiez désormais d'avantages et de\npromotions supplémentaires !",
+                        "🎉 Félicitations !\nVous bénéficiez désormais d’avantages\net promotions supplémentaires !",
                         "Nouveaux Avantages",
                         JOptionPane.INFORMATION_MESSAGE
                 );
             }
 
-            // 6) Ouverture de la page principale
-            new PagePrincipale().setVisible(true);
+            // 6) Redirection selon rang
+            if (user.getRang() == 0) {
+                new PageAdmin().setVisible(true);
+            } else {
+                new PagePrincipale().setVisible(true);
+            }
             vueConnexion.dispose();
 
         } else {
