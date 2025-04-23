@@ -98,4 +98,23 @@ public class UtilisateurDAO {
             return false;
         }
     }
+
+    public boolean mettreAJourProfil(Utilisateur userUpdated) {
+        String sql = "UPDATE utilisateurs SET prenom = ?, nom = ?, email = ?, mot_de_passe = ?, adresse = ? "
+                + "WHERE id = ?";
+        try (Connection connexion = ConnectionFactory.getConnection();
+             PreparedStatement ps = connexion.prepareStatement(sql)) {
+            ps.setString(1, userUpdated.getPrenom());
+            ps.setString(2, userUpdated.getNom());
+            ps.setString(3, userUpdated.getEmail());
+            ps.setString(4, userUpdated.getMotDePasse());
+            ps.setString(5, userUpdated.getAdresse());
+            ps.setInt(6, userUpdated.getId());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            return false;
+        }
+    }
 }
+
