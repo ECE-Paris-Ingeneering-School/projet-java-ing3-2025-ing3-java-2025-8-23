@@ -58,8 +58,8 @@ public class UtilisateurDAO {
      */
     public boolean inscrireUtilisateur(Utilisateur utilisateur) {
         String sql =
-                "INSERT INTO utilisateurs (prenom, nom, email, mot_de_passe, adresse) " +
-                        "VALUES (?, ?, ?, ?, ?)";
+                "INSERT INTO utilisateurs (prenom, nom, email, mot_de_passe, adresse, rang) " +
+                        "VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection connexion = ConnectionFactory.getConnection();
              PreparedStatement ps = connexion.prepareStatement(sql)) {
 
@@ -68,6 +68,8 @@ public class UtilisateurDAO {
             ps.setString(3, utilisateur.getEmail());
             ps.setString(4, utilisateur.getMotDePasse());
             ps.setString(5, utilisateur.getAdresse());
+            ps.setString(6,"1");
+
 
             return ps.executeUpdate() > 0;
         } catch (SQLException ex) {
