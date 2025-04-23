@@ -3,6 +3,9 @@ package Vue;
 import Modele.ModeleImage;
 import Modele.ProduitImage;
 
+import Modele.Utilisateur;
+import Utilitaires.Session;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -17,6 +20,8 @@ public class PagePrincipale extends JFrame {
     private List<ProduitImage> tousLesProduits;
 
     public PagePrincipale() {
+        Utilisateur user = Session.getUtilisateur();
+
         setTitle("Boutique Shopping - Accueil");
         setSize(1000, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -50,17 +55,19 @@ public class PagePrincipale extends JFrame {
         JPanel rightButtonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         rightButtonPanel.setOpaque(false);
         JButton btnPanier = new JButton("Mon Panier");
-        JButton btnDeconnexion = new JButton("Déconnexion");
+        JButton btnProfil = new JButton("Profil");
         btnPanier.setBackground(Color.WHITE);
-        btnDeconnexion.setBackground(Color.WHITE);
+        btnProfil.setBackground(Color.WHITE);
         rightButtonPanel.add(btnPanier);
-        rightButtonPanel.add(btnDeconnexion);
+        rightButtonPanel.add(btnProfil);
         panelEntete.add(rightButtonPanel, BorderLayout.EAST);
 
-        btnDeconnexion.addActionListener(e -> {
-            dispose();
-            SwingUtilities.invokeLater(() -> new PageConnexion().setVisible(true));
+        btnProfil.addActionListener(e -> {
+
+             new PageProfil().setVisible(true);;
         });
+
+
 
         btnPanier.addActionListener(e -> {
             dispose();
@@ -241,5 +248,5 @@ public class PagePrincipale extends JFrame {
         panelContenu.repaint();
     }
 
-    
+
 }
