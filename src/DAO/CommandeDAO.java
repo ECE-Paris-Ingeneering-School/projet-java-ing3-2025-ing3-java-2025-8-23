@@ -7,6 +7,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import Utilitaires.ConnectionFactory;
+import Modele.Commande;
+import Modele.Panier;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * DAO pour la table `commandes`.
@@ -55,5 +59,55 @@ public class CommandeDAO {
             ex.printStackTrace();
         }
         return commandeId;
+    }
+
+    public List<Commande> getAllCommandes() {
+        List<Commande> liste = new ArrayList<>();
+        String sql = "SELECT id, utilisateur_id, date_commande, total FROM commandes";
+        try (Connection conn = ConnectionFactory.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                liste.add(new Commande(
+                        rs.getInt("id"),
+                        rs.getInt("utilisateur_id"),
+                        rs.getDate("date_commande"),
+                        rs.getDouble("total")
+                ));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return liste;
+    }
+
+    /**
+     * Récupère le détail d’une commande (ses lignes de panier).
+     */
+    public List<Panier> getDetailsCommande(int commandeId) {
+        List<Panier> liste = new ArrayList<>();
+        String sql = ""
+                + "SELECT p.id, p.article_id, p.quantite, a.nom, a.prix "
+                + "FROM panier p "
+                + "JOIN articles a ON p.article_id = a.id "
+                + "WHERE p.commande_id = ?";
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, commandeId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    liste.add(new Panier(
+                            rs.getInt("id"),
+                            rs.getInt("article_id"),
+                            rs.getInt("quantite"),
+                            rs.getString("nom"),
+                            rs.getDouble("prix")
+                    ));
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return liste;
     }
 }
