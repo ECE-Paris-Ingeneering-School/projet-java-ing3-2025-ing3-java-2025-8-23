@@ -1,14 +1,16 @@
 package Vue;
 
-import Modele.ModeleImage;
-import Modele.ProduitImage;
-
+import DAO.ArticlesDAO;
+import DAO.CommandeDAO;
+import DAO.PanierDAO;
+import Modele.Article;
 import Modele.Utilisateur;
 import Utilitaires.Session;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -17,7 +19,7 @@ public class PagePrincipale extends JFrame {
     private JTextField barreRecherche;
     private JComboBox<String> comboMarques;
     private JPanel panelContenu;
-    private List<ProduitImage> tousLesProduits;
+    private List<Article> tousLesArticles;
 
     public PagePrincipale() {
         Utilisateur user = Session.getUtilisateur();
@@ -40,16 +42,14 @@ public class PagePrincipale extends JFrame {
 
         JPanel centerSearchPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
         barreRecherche = new JTextField(20);
-        comboMarques = new JComboBox<>();
-        comboMarques.setPreferredSize(new Dimension(100, 30));
+        comboMarques     = new JComboBox<>();
         barreRecherche.setPreferredSize(new Dimension(150, 30));
-
+        comboMarques.setPreferredSize(new Dimension(100, 30));
         centerSearchPanel.setOpaque(false);
         centerSearchPanel.add(new JLabel("Recherche : "));
         centerSearchPanel.add(barreRecherche);
         centerSearchPanel.add(new JLabel("Marque : "));
         centerSearchPanel.add(comboMarques);
-
         panelEntete.add(centerSearchPanel, BorderLayout.CENTER);
 
         JPanel rightButtonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -62,17 +62,12 @@ public class PagePrincipale extends JFrame {
         rightButtonPanel.add(btnProfil);
         panelEntete.add(rightButtonPanel, BorderLayout.EAST);
 
-        btnProfil.addActionListener(e -> {
-
-             new PageProfil().setVisible(true);;
-        });
-
-
-
+        // **Ouvre Panierbis** (et non plus Panier)
         btnPanier.addActionListener(e -> {
             dispose();
-            SwingUtilities.invokeLater(() -> new Panier().setVisible(true));
+            SwingUtilities.invokeLater(() -> new Panierbis().setVisible(true));
         });
+        btnProfil.addActionListener(e -> new PageProfil().setVisible(true));
 
         add(panelEntete, BorderLayout.NORTH);
 
@@ -82,24 +77,22 @@ public class PagePrincipale extends JFrame {
         panelNavigation.setPreferredSize(new Dimension(150, 600));
         panelNavigation.setBackground(new Color(240, 240, 240));
         String[] categories = {"Pantalon", "T-Shirt", "Sweat", "Chaussure", "Veste"};
-        for (String categorie : categories) {
-            JButton boutonCategorie = new JButton(categorie);
-            boutonCategorie.setAlignmentX(Component.CENTER_ALIGNMENT);
-            boutonCategorie.setMaximumSize(new Dimension(140, 30));
-            boutonCategorie.addActionListener(e -> filtrerParCategorie(categorie));
+        for (String cat : categories) {
+            JButton btnCat = new JButton(cat);
+            btnCat.setAlignmentX(Component.CENTER_ALIGNMENT);
+            btnCat.setMaximumSize(new Dimension(140, 30));
+            btnCat.addActionListener(e -> filtrerParCategorie(cat));
             panelNavigation.add(Box.createRigidArea(new Dimension(0, 10)));
-            panelNavigation.add(boutonCategorie);
+            panelNavigation.add(btnCat);
         }
         add(panelNavigation, BorderLayout.WEST);
 
-        // --- Centre : panneau de contenu ---
+        // --- Contenu central ---
         panelContenu = new JPanel(new GridLayout(0, 4, 20, 20));
         panelContenu.setBackground(Color.WHITE);
         JScrollPane scrollPane = new JScrollPane(panelContenu);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-        scrollPane.setPreferredSize(new Dimension(800, 400));
         add(scrollPane, BorderLayout.CENTER);
 
         // --- Pied de page ---
@@ -108,145 +101,108 @@ public class PagePrincipale extends JFrame {
         panelPied.add(new JLabel("© 2025 Ma Boutique. Tous droits réservés."));
         add(panelPied, BorderLayout.SOUTH);
 
-        // --- Données et actions ---
-        tousLesProduits = ModeleImage.getProduitsDepuisBDD();
+        // --- Chargement des articles et affichage initial ---
+        tousLesArticles = ArticlesDAO.getAllArticles();
         chargerMarques();
-        afficherProduits(tousLesProduits);
+        afficherProduits(tousLesArticles);
 
         barreRecherche.addActionListener(e -> filtrerProduits());
         comboMarques.addActionListener(e -> filtrerProduits());
     }
 
     private void filtrerProduits() {
-        String texte = barreRecherche.getText().trim().toLowerCase();
-        String marqueSelectionnee = comboMarques.getSelectedItem().toString();
-
-        List<ProduitImage> filtres = tousLesProduits.stream()
-                .filter(p -> p.getNom().toLowerCase().contains(texte))
-                .filter(p -> marqueSelectionnee.equals("Toutes") || p.getMarque().equalsIgnoreCase(marqueSelectionnee))
+        String txt = barreRecherche.getText().trim().toLowerCase();
+        String marque = comboMarques.getSelectedItem().toString();
+        List<Article> filtres = tousLesArticles.stream()
+                .filter(a -> a.getNom().toLowerCase().contains(txt))
+                .filter(a -> marque.equals("Toutes") || a.getMarque().equalsIgnoreCase(marque))
                 .collect(Collectors.toList());
-
         afficherProduits(filtres);
     }
 
-    private void filtrerParCategorie(String categorie) {
-        List<ProduitImage> filtres = tousLesProduits.stream()
-                .filter(p -> p.getNom().toLowerCase().contains(categorie.toLowerCase()))
+    private void filtrerParCategorie(String cat) {
+        List<Article> filtres = tousLesArticles.stream()
+                .filter(a -> a.getNom().toLowerCase().contains(cat.toLowerCase()))
                 .collect(Collectors.toList());
         afficherProduits(filtres);
     }
 
     private void chargerMarques() {
-        Set<String> marques = tousLesProduits.stream()
-                .map(ProduitImage::getMarque)
+        Set<String> marques = tousLesArticles.stream()
+                .map(Article::getMarque)
                 .filter(m -> m != null && !m.isEmpty())
                 .collect(Collectors.toSet());
-
         comboMarques.addItem("Toutes");
         marques.stream().sorted().forEach(comboMarques::addItem);
     }
 
-    private void afficherProduits(List<ProduitImage> produits) {
+    private void afficherProduits(List<Article> produits) {
         panelContenu.removeAll();
 
-        for (ProduitImage produit : produits) {
-            JPanel panelProduit = new JPanel(new BorderLayout());
-            panelProduit.setPreferredSize(new Dimension(200, 220));
-            panelProduit.setBackground(Color.WHITE);
-            panelProduit.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(new Color(220, 220, 220), 1),
-                    BorderFactory.createCompoundBorder(
-                            BorderFactory.createMatteBorder(1, 1, 1, 1, new Color(200, 200, 200)),
-                            BorderFactory.createEmptyBorder(10, 10, 10, 10)
-                    )
-            ));
-            panelProduit.setOpaque(true);
-            panelProduit.setBackground(Color.WHITE);
-            panelProduit.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1),
-                    BorderFactory.createEmptyBorder(10, 10, 10, 10)));
-            panelProduit.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
-                    BorderFactory.createEmptyBorder(10, 10, 10, 10)));
+        Utilisateur user = Session.getUtilisateur();
+        CommandeDAO commandeDAO = new CommandeDAO();
+        int commandeId = commandeDAO.getOuCreateCommandeEnCours(user.getId());
+        PanierDAO panierDAO     = new PanierDAO();
 
-            JLabel imageLabel;
-            byte[] data = produit.getImage();
+        for (Article article : produits) {
+            JPanel panelArticle = new JPanel(new BorderLayout());
+            panelArticle.setPreferredSize(new Dimension(200, 220));
+            panelArticle.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+            panelArticle.setBackground(Color.WHITE);
 
+            JLabel imageLabel = new JLabel();
+            byte[] data = article.getImage();
             if (data != null && data.length > 0) {
                 ImageIcon icon = new ImageIcon(data);
-                if (icon.getIconWidth() > 0 && icon.getIconHeight() > 0) {
-                    Image image = icon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
-                    imageLabel = new JLabel(new ImageIcon(image));
-                } else {
-                    imageLabel = new JLabel("Image corrompue");
-                }
+                Image img = icon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+                imageLabel.setIcon(new ImageIcon(img));
             } else {
-                imageLabel = new JLabel("Pas d'image");
+                imageLabel.setText("Pas d'image");
             }
-
             imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-            imageLabel.setVerticalAlignment(SwingConstants.TOP);
             imageLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-            imageLabel.addMouseListener(new java.awt.event.MouseAdapter() {
-                public void mouseClicked(java.awt.event.MouseEvent evt) {
+            imageLabel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent evt) {
                     JSpinner spinner = new JSpinner(new SpinnerNumberModel(1, 1, 100, 1));
-                    JPanel popupPanel = new JPanel(new GridLayout(0, 1, 5, 5));
-                    popupPanel.add(new JLabel("Produit : " + produit.getNom()));
-                    popupPanel.add(new JLabel("Prix unitaire : " + produit.getPrix() + " €"));
-                    popupPanel.add(new JLabel("Quantité :"));
-                    popupPanel.add(spinner);
+                    JPanel popup = new JPanel(new GridLayout(0, 1, 5, 5));
+                    popup.add(new JLabel("Article : " + article.getNom()));
+                    popup.add(new JLabel("Prix unitaire : " + article.getPrix() + " €"));
+                    popup.add(new JLabel("Quantité :"));
+                    popup.add(spinner);
 
-                    int result = JOptionPane.showConfirmDialog(
-                            null, popupPanel, "Ajouter au panier", JOptionPane.OK_CANCEL_OPTION);
+                    int choix = JOptionPane.showConfirmDialog(
+                            null, popup, "Ajouter au panier", JOptionPane.OK_CANCEL_OPTION);
 
-                    if (result == JOptionPane.OK_OPTION) {
-                        int quantite = (int) spinner.getValue();
-                        double prixUnitaire = produit.getPrix();
-                        double total = prixUnitaire * quantite;
-                        double reduction = 0;
-
-                        if (quantite >= 10) {
-                            reduction = 0.10 * total;
-                            total -= reduction;
-                        }
-
-                        String message = "Produit : " + produit.getNom() + "\n"
-                                + "Quantité : " + quantite + "\n"
-                                + "Prix unitaire : " + prixUnitaire + " €\n";
-
-                        if (reduction > 0) {
-                            message += "Réduction : -" + (int)(reduction) + " €\n";
-                        }
-
-                        message += "Total à payer : " + total + " €";
-
-                        JOptionPane.showMessageDialog(null, message, "Ajout au panier", JOptionPane.INFORMATION_MESSAGE);
-                        System.out.println("Ajouté au panier : " + produit.getNom()
-                                + " x" + quantite + " = " + total + "€ (réduction : " + reduction + "€)");
+                    if (choix == JOptionPane.OK_OPTION) {
+                        int qte = (int) spinner.getValue();
+                        panierDAO.ajouterProduit(commandeId, article.getId(), qte);
+                        JOptionPane.showMessageDialog(
+                                null,
+                                article.getNom() + " x" + qte + " ajouté(s) à votre panier.",
+                                "Panier mis à jour",
+                                JOptionPane.INFORMATION_MESSAGE
+                        );
                     }
                 }
             });
 
-            panelProduit.add(imageLabel, BorderLayout.CENTER);
+            panelArticle.add(imageLabel, BorderLayout.CENTER);
 
-            JLabel labelNom = new JLabel(produit.getNom(), SwingConstants.CENTER);
-            JLabel labelPrix = new JLabel(produit.getPrix() + " €", SwingConstants.CENTER);
-            labelPrix.setForeground(new Color(30, 144, 255));
-            labelPrix.setFont(new Font("SansSerif", Font.BOLD, 13));
+            JLabel lblNom  = new JLabel(article.getNom(), SwingConstants.CENTER);
+            JLabel lblPrix = new JLabel(article.getPrix() + " €", SwingConstants.CENTER);
+            lblPrix.setFont(new Font("SansSerif", Font.BOLD, 13));
 
-            JPanel blocBas = new JPanel(new GridLayout(2, 1));
-            blocBas.setOpaque(false);
-            blocBas.add(labelNom);
-            blocBas.add(labelPrix);
+            JPanel bas = new JPanel(new GridLayout(2, 1));
+            bas.add(lblNom);
+            bas.add(lblPrix);
+            panelArticle.add(bas, BorderLayout.SOUTH);
 
-            panelProduit.add(blocBas, BorderLayout.SOUTH);
-            panelContenu.add(panelProduit);
+            panelContenu.add(panelArticle);
         }
 
         panelContenu.revalidate();
         panelContenu.repaint();
     }
-
-
 }
