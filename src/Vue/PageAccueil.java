@@ -90,9 +90,12 @@ public class PageAccueil extends JFrame {
                 switch (item) {
                     case "Connexion" -> new PageConnexion().setVisible(true);
                     case "Inscription" -> new PageInscription().setVisible(true);
-                    case "Catalogue" -> new PagePrincipale().setVisible(true);
+                    case "Catalogue" -> {
+                        PagePrincipale page = new PagePrincipale();
+                        page.setVisible(true);
+                        dispose();
+                    }
                 }
-                dispose();
             });
 
             nav.add(btn);
@@ -146,7 +149,8 @@ public class PageAccueil extends JFrame {
         exploreBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         exploreBtn.addActionListener(e -> {
-            new PagePrincipale().setVisible(true);
+            PagePrincipale page = new PagePrincipale();
+            page.setVisible(true);
             dispose();
         });
 
@@ -251,6 +255,11 @@ public class PageAccueil extends JFrame {
             public void mouseClicked(MouseEvent e) {
                 PagePrincipale page = new PagePrincipale();
                 page.setVisible(true);
+                // Trouver la catégorie à partir du nom du produit
+                String categorie = trouverCategorie(produit.getNom());
+                if (categorie != null) {
+                    filtrerPagePrincipale(page, categorie);
+                }
                 dispose();
             }
 
@@ -272,6 +281,46 @@ public class PageAccueil extends JFrame {
         });
 
         return card;
+    }
+
+    private String trouverCategorie(String nomProduit) {
+        String nomLower = nomProduit.toLowerCase();
+        if (nomLower.contains("pantalon")) return "Pantalon";
+        if (nomLower.contains("t-shirt") || nomLower.contains("tshirt")) return "T-Shirt";
+        if (nomLower.contains("sweat")) return "Sweat";
+        if (nomLower.contains("chaussure")) return "Chaussure";
+        if (nomLower.contains("veste")) return "Veste";
+        return null;
+    }
+
+    private void filtrerPagePrincipale(PagePrincipale page, String categorie) {
+        // Utilise la réflexion pour accéder à la méthode privée si nécessaire
+        try {
+            java.lang.reflect.Method method = PagePrincipale.class.getDeclaredMethod("filtrerParCategorie", String.class);
+            method.setAccessible(true);
+            method.invoke(page, categorie);
+        } catch (Exception e) {
+            System.err.println("Erreur lors du filtrage: " + e.getMessage());
+            // Alternative: simuler un clic sur le bouton de catégorie
+            simulerClicCategorie(page, categorie);
+        }
+    }
+
+    private void simulerClicCategorie(PagePrincipale page, String categorie) {
+        // Parcourt tous les composants pour trouver le bon bouton
+        for (Component comp : page.getContentPane().getComponents()) {
+            if (comp instanceof JPanel) {
+                for (Component subComp : ((JPanel) comp).getComponents()) {
+                    if (subComp instanceof JButton) {
+                        JButton btn = (JButton) subComp;
+                        if (btn.getText().equalsIgnoreCase(categorie)) {
+                            btn.doClick();
+                            return;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private JPanel createCategoriesSection() {
@@ -334,6 +383,7 @@ public class PageAccueil extends JFrame {
             public void mouseClicked(MouseEvent e) {
                 PagePrincipale page = new PagePrincipale();
                 page.setVisible(true);
+                filtrerPagePrincipale(page, categorie);
                 dispose();
             }
 
