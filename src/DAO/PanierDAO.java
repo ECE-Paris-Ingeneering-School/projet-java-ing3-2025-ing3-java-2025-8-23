@@ -110,18 +110,16 @@ public class PanierDAO {
         }
     }
 
-    /**
-     * Vide entièrement le panier (toutes commandes).
-     * Si vous ne voulez vider que la commande en cours,
-     * ajoutez un WHERE commande_id = ... dans la requête.
-     */
-    public void viderPanier() {
-        String sql = "DELETE FROM panier";
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.executeUpdate();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
+    public void viderPanierCommande(int commandeId) {
+        try (Connection conn = ConnectionFactory.getConnection()) {
+            String sql = "DELETE FROM panier WHERE commande_id = ?";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, commandeId);
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
+
 }

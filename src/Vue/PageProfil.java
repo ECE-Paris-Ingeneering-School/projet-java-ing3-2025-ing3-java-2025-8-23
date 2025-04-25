@@ -1,53 +1,57 @@
 package Vue;
 
-import Utilitaires.Session;
+import DAO.CommandeDAO;
 import DAO.UtilisateurDAO;
+import Modele.Commande;
+import Modele.Panier;
 import Modele.Utilisateur;
+import Utilitaires.Session;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
+import java.awt.event.*;
+import java.util.List;
 
-/**
- * Profil Utilisateur en lecture/édition, avec GridBagLayout pour un rendu soigné.
- */
 public class PageProfil extends JFrame {
-    private final UtilisateurDAO dao = new UtilisateurDAO();
+    private final UtilisateurDAO userDao     = new UtilisateurDAO();
+    private final CommandeDAO commandeDAO    = new CommandeDAO();
     private Utilisateur user;
 
-    // Conteneurs
-    private JPanel mainPanel;
+    // Composants Profil
     private JPanel formPanel;
     private JPanel buttonPanel;
-
-    // Composants lecture
-    private JLabel lblPrenom, lblNom, lblEmail, lblAdresse, lblInscription, lblStatut;
-
-    // Composants édition
     private JTextField fldPrenom, fldNom, fldEmail, fldAdresse;
     private JPasswordField fldAncienMDP, fldNouveauMDP;
 
     public PageProfil() {
         user = Session.getUtilisateur();
-        initUI();
-        showLectureMode();
-    }
-
-    private void initUI() {
-        setTitle("Profil Utilisateur");
+        setTitle("Mon Profil - " + user.getPrenom() + " " + user.getNom());
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setSize(500, 400);
+        setSize(700, 500);
         setLocationRelativeTo(null);
 
-        mainPanel = new JPanel(new BorderLayout(10, 10));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
-        setContentPane(mainPanel);
+        JTabbedPane onglets = new JTabbedPane();
+        onglets.addTab("Profil",      buildProfilPanel());
+        onglets.addTab("Historique",  buildHistoriquePanel());
+
+        add(onglets, BorderLayout.CENTER);
+        setVisible(true);
+    }
+
+    private JPanel buildProfilPanel() {
+        JPanel main = new JPanel(new BorderLayout(10,10));
+        main.setBorder(BorderFactory.createEmptyBorder(15,15,15,15));
 
         formPanel   = new JPanel(new GridBagLayout());
         buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
 
-        mainPanel.add(formPanel, BorderLayout.CENTER);
-        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+        main.add(formPanel,   BorderLayout.CENTER);
+        main.add(buttonPanel, BorderLayout.SOUTH);
+
+        showLectureMode();
+
+        return main;
     }
 
     private void showLectureMode() {
@@ -57,17 +61,15 @@ public class PageProfil extends JFrame {
         GridBagConstraints gbc = createGbc();
         int row = 0;
 
-        // Prénom
         addLabelValue("Prénom :", user.getPrenom(), gbc, row++);
-        // Nom
-        addLabelValue("Nom :", user.getNom(), gbc, row++);
-        // Email
-        addLabelValue("Email :", user.getEmail(), gbc, row++);
-        // Adresse
-        addLabelValue("Adresse :", user.getAdresse(), gbc, row++);
-        // Date d'inscription
-        addLabelValue("Inscrit le :", user.getDateInscription().toString(), gbc, row++);
-        // Statut
+        addLabelValue("Nom :",     user.getNom(),    gbc, row++);
+        addLabelValue("Email :",   user.getEmail(),  gbc, row++);
+        addLabelValue("Adresse :", user.getAdresse(),gbc, row++);
+
+        gbc.gridy = row++;
+        addLabelValue("Date d'inscription :",
+                user.getDateInscription().toString(), gbc, row-1);
+
         String statut = switch(user.getRang()) {
             case 0 -> "Administrateur";
             case 1 -> "Nouveau client";
@@ -76,20 +78,20 @@ public class PageProfil extends JFrame {
         };
         addLabelValue("Statut :", statut, gbc, row++);
 
-        // Boutons
         JButton btnModifier    = new JButton("Modifier");
         JButton btnDeconnexion = new JButton("Déconnexion");
         buttonPanel.add(btnModifier);
         buttonPanel.add(btnDeconnexion);
 
-        btnModifier.addActionListener((ActionEvent e) -> showEditionMode());
-        btnDeconnexion.addActionListener((ActionEvent e) -> {
+        btnModifier.addActionListener(e -> showEditionMode());
+        btnDeconnexion.addActionListener(e -> {
             Session.clear();
             for (Window w : Window.getWindows()) w.dispose();
             new PageConnexion().setVisible(true);
         });
 
-        revalidate(); repaint();
+        formPanel.revalidate();
+        formPanel.repaint();
     }
 
     private void showEditionMode() {
@@ -99,22 +101,18 @@ public class PageProfil extends JFrame {
         GridBagConstraints gbc = createGbc();
         int row = 0;
 
-        // Champ Prénom
-        fldPrenom = addLabelField("Prénom :", user.getPrenom(), gbc, row++);
-        // Champ Nom
-        fldNom    = addLabelField("Nom :", user.getNom(), gbc, row++);
-        // Champ Email
-        fldEmail  = addLabelField("Email :", user.getEmail(), gbc, row++);
-        // Champ Adresse
-        fldAdresse= addLabelField("Adresse :", user.getAdresse(), gbc, row++);
+        fldPrenom   = addLabelField("Prénom :",   user.getPrenom(),    gbc, row++);
+        fldNom      = addLabelField("Nom :",      user.getNom(),       gbc, row++);
+        fldEmail    = addLabelField("Email :",    user.getEmail(),     gbc, row++);
+        fldAdresse  = addLabelField("Adresse :",  user.getAdresse(),   gbc, row++);
 
-        // Ancien / Nouveau mot de passe côte à côte
+        // Ancien / Nouveau mot de passe
         gbc.gridy = row; gbc.gridx = 0; gbc.gridwidth = 1;
         formPanel.add(new JLabel("Ancien mot de passe :"), gbc);
         gbc.gridx = 1; gbc.gridwidth = 2;
         fldAncienMDP = new JPasswordField();
         fldAncienMDP.setEchoChar('•');
-        fldAncienMDP.setPreferredSize(new Dimension(200, 24));
+        fldAncienMDP.setPreferredSize(new Dimension(200,24));
         formPanel.add(fldAncienMDP, gbc);
 
         row++;
@@ -123,18 +121,8 @@ public class PageProfil extends JFrame {
         gbc.gridx = 1; gbc.gridwidth = 2;
         fldNouveauMDP = new JPasswordField();
         fldNouveauMDP.setEchoChar('•');
-        fldNouveauMDP.setPreferredSize(new Dimension(200, 24));
+        fldNouveauMDP.setPreferredSize(new Dimension(200,24));
         formPanel.add(fldNouveauMDP, gbc);
-
-        // Lecture seule date + statut sous les champs
-        row++;
-        addLabelValue("Inscrit le :", user.getDateInscription().toString(), gbc, row++);
-        addLabelValue("Statut :", switch(user.getRang()) {
-            case 0 -> "Administrateur";
-            case 1 -> "Nouveau client";
-            case 2 -> "Ancien client";
-            default -> "Inconnu";
-        }, gbc, row++);
 
         // Boutons Sauvegarder / Annuler
         JButton btnSauvegarder = new JButton("Sauvegarder");
@@ -142,30 +130,31 @@ public class PageProfil extends JFrame {
         buttonPanel.add(btnSauvegarder);
         buttonPanel.add(btnAnnuler);
 
-        btnAnnuler.addActionListener((ActionEvent e) -> showLectureMode());
-        btnSauvegarder.addActionListener((ActionEvent e) -> saveChanges());
+        btnAnnuler.addActionListener(e -> showLectureMode());
+        btnSauvegarder.addActionListener(e -> saveChanges());
 
-        revalidate(); repaint();
+        formPanel.revalidate();
+        formPanel.repaint();
     }
 
     private void saveChanges() {
-        String prenom = fldPrenom.getText().trim();
-        String nom    = fldNom.getText().trim();
-        String email  = fldEmail.getText().trim();
-        String adresse= fldAdresse.getText().trim();
-        String ancien = new String(fldAncienMDP.getPassword()).trim();
-        String nouveau= new String(fldNouveauMDP.getPassword()).trim();
+        String prenom  = fldPrenom.getText().trim();
+        String nom     = fldNom.getText().trim();
+        String email   = fldEmail.getText().trim();
+        String adresse = fldAdresse.getText().trim();
+        String ancien  = new String(fldAncienMDP.getPassword()).trim();
+        String nouveau = new String(fldNouveauMDP.getPassword()).trim();
 
-        if (prenom.isEmpty() || nom.isEmpty() || email.isEmpty() || adresse.isEmpty()) {
+        if (prenom.isEmpty()||nom.isEmpty()||email.isEmpty()||adresse.isEmpty()) {
             JOptionPane.showMessageDialog(this,
-                    "Les champs Prénom, Nom, Email et Adresse sont obligatoires.",
+                    "Tous les champs sont obligatoires.",
                     "Erreur", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         String mdpFinal = user.getMotDePasse();
-        if (!ancien.isEmpty() || !nouveau.isEmpty()) {
-            if (ancien.isEmpty() || nouveau.isEmpty()) {
+        if (!ancien.isEmpty()||!nouveau.isEmpty()) {
+            if (ancien.isEmpty()||nouveau.isEmpty()) {
                 JOptionPane.showMessageDialog(this,
                         "Renseignez l'ancien ET le nouveau mot de passe.",
                         "Erreur", JOptionPane.ERROR_MESSAGE);
@@ -186,13 +175,12 @@ public class PageProfil extends JFrame {
                 user.getDateInscription(),
                 user.getRang()
         );
-
-        if (dao.mettreAJourProfil(maj)) {
+        if (userDao.mettreAJourProfil(maj)) {
             Session.setUtilisateur(maj);
             user = maj;
             JOptionPane.showMessageDialog(this,
-                    "Profil mis à jour avec succès !",
-                    "Confirmation", JOptionPane.INFORMATION_MESSAGE);
+                    "Profil mis à jour !",
+                    "OK", JOptionPane.INFORMATION_MESSAGE);
             showLectureMode();
         } else {
             JOptionPane.showMessageDialog(this,
@@ -201,37 +189,94 @@ public class PageProfil extends JFrame {
         }
     }
 
-    // Helper pour créer GridBagConstraints de base
+    private JPanel buildHistoriquePanel() {
+        JPanel pnl = new JPanel(new BorderLayout(10,10));
+        pnl.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+
+        // Table des commandes
+        String[] colsCmd = {"ID","Date","Total (€)","Statut"};
+        DefaultTableModel mCmd = new DefaultTableModel(colsCmd,0) {
+            @Override public boolean isCellEditable(int r,int c){return false;}
+        };
+        JTable tblCmd = new JTable(mCmd);
+
+        // Chargement historique
+        List<Commande> commandes = commandeDAO.getCommandesByUtilisateur(user.getId());
+
+        for (Commande c : commandes) {
+            String st = (c.getValider()==1) ? "Payée" : "En cours";
+            mCmd.addRow(new Object[]{
+                    c.getId(), c.getDateCommande(),
+                    String.format("%.2f",c.getTotal()), st
+            });
+        }
+
+        // Table des détails
+        String[] colsDet = {"Article","Prix U. (€)","Quantité","Sous-total (€)"};
+        DefaultTableModel mDet = new DefaultTableModel(colsDet,0) {
+            @Override public boolean isCellEditable(int r,int c){return false;}
+        };
+        JTable tblDet = new JTable(mDet);
+
+        // Listener pour charger le détail au clic
+        tblCmd.getSelectionModel().addListSelectionListener(evt->{
+            if (!evt.getValueIsAdjusting()) {
+                int r = tblCmd.getSelectedRow();
+                if (r>=0) {
+                    int idCmd = (int)mCmd.getValueAt(r,0);
+                    mDet.setRowCount(0);
+                    List<Panier> lignes =
+                            commandeDAO.getDetailsCommande(idCmd);
+                    for (Panier p : lignes) {
+                        double sous = p.getPrix()*p.getQuantite();
+                        mDet.addRow(new Object[]{
+                                p.getNom(),
+                                String.format("%.2f",p.getPrix()),
+                                p.getQuantite(),
+                                String.format("%.2f",sous)
+                        });
+                    }
+                }
+            }
+        });
+
+        JSplitPane split = new JSplitPane(
+                JSplitPane.VERTICAL_SPLIT,
+                new JScrollPane(tblCmd),
+                new JScrollPane(tblDet)
+        );
+        split.setDividerLocation(180);
+
+        pnl.add(split, BorderLayout.CENTER);
+        return pnl;
+    }
+
     private GridBagConstraints createGbc() {
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(8, 8, 8, 8);
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.fill   = GridBagConstraints.HORIZONTAL;
-        gbc.weightx= 1.0;
+        gbc.insets  = new Insets(8,8,8,8);
+        gbc.anchor  = GridBagConstraints.WEST;
+        gbc.fill    = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
         return gbc;
     }
 
-    // Ajoute une ligne lecture : JLabel(label) + JLabel(value)
-    private void addLabelValue(String label, String value, GridBagConstraints gbc, int row) {
+    private void addLabelValue(String label, String value,
+                               GridBagConstraints gbc, int row) {
         gbc.gridy = row;
         gbc.gridx = 0; gbc.gridwidth = 1;
         formPanel.add(new JLabel(label), gbc);
-
         gbc.gridx = 1; gbc.gridwidth = 2;
-        JLabel val = new JLabel(value);
-        val.setFont(val.getFont().deriveFont(Font.BOLD));
-        formPanel.add(val, gbc);
+        formPanel.add(new JLabel(value), gbc);
     }
 
-    // Ajoute une ligne édition : JLabel(label) + JTextField(initial) et renvoie le JTextField
-    private JTextField addLabelField(String label, String initial, GridBagConstraints gbc, int row) {
+    private JTextField addLabelField(String label, String init,
+                                     GridBagConstraints gbc, int row) {
         gbc.gridy = row;
         gbc.gridx = 0; gbc.gridwidth = 1;
         formPanel.add(new JLabel(label), gbc);
-
         gbc.gridx = 1; gbc.gridwidth = 2;
-        JTextField fld = new JTextField(initial);
-        fld.setPreferredSize(new Dimension(200, 24));
+        JTextField fld = new JTextField(init);
+        fld.setPreferredSize(new Dimension(200,24));
         formPanel.add(fld, gbc);
         return fld;
     }

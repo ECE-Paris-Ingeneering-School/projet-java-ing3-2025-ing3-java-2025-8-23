@@ -23,7 +23,7 @@ public class Panierbis extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // Récupère la commande en cours de l'utilisateur
+        // Récupère la commande non payée de l'utilisateur
         Utilisateur user = Session.getUtilisateur();
         commandeId = new CommandeDAO().getOuCreateCommandeEnCours(user.getId());
 
@@ -47,6 +47,7 @@ public class Panierbis extends JFrame {
         JPanel bottomPanel = new JPanel(new BorderLayout());
         JPanel buttonPanel = new JPanel();
 
+        // Supprimer un article
         JButton supprimerBtn = new JButton("Supprimer");
         supprimerBtn.addActionListener(e -> {
             int sel = table.getSelectedRow();
@@ -60,40 +61,41 @@ public class Panierbis extends JFrame {
             }
         });
 
+        // Vider la commande en cours
         JButton viderBtn = new JButton("Vider le panier");
         viderBtn.addActionListener(e -> {
-            int confirm = JOptionPane.showConfirmDialog(
+            if (JOptionPane.showConfirmDialog(
                     this,
                     "Vider entièrement votre panier ?",
                     "Confirmation",
                     JOptionPane.YES_NO_OPTION
-            );
-            if (confirm == JOptionPane.YES_OPTION) {
-                panierDAO.viderPanier(); // ou ajouter un filtre commande si besoin
+            ) == JOptionPane.YES_OPTION) {
+                panierDAO.viderPanierCommande(commandeId);  // méthode à ajouter en DAO
                 chargerPanier();
             }
         });
 
+        // Continuer les achats
         JButton retourBtn = new JButton("Continuer mes achats");
         retourBtn.addActionListener(e -> {
             dispose();
             SwingUtilities.invokeLater(() -> new PagePrincipale().setVisible(true));
         });
 
+        // Passer au paiement
         JButton payerBtn = new JButton("Passer au paiement");
         payerBtn.setBackground(new Color(76, 175, 80));
         payerBtn.setForeground(Color.WHITE);
         payerBtn.setFont(payerBtn.getFont().deriveFont(Font.BOLD));
         payerBtn.addActionListener(e -> {
-            // Calculer le total
             double total = panierDAO.getPanier(commandeId).stream()
                     .mapToDouble(item -> item.getPrix() * item.getQuantite())
                     .sum();
             if (total <= 0) {
                 JOptionPane.showMessageDialog(this, "Panier vide !", "Erreur", JOptionPane.WARNING_MESSAGE);
             } else {
-                SwingUtilities.invokeLater(() -> new Paiementbis(total).setVisible(true));
                 dispose();
+                SwingUtilities.invokeLater(() -> new Paiementbis().setVisible(true));
             }
         });
 
@@ -106,27 +108,40 @@ public class Panierbis extends JFrame {
         totalLabel.setFont(new Font("Arial", Font.BOLD, 16));
 
         bottomPanel.add(buttonPanel, BorderLayout.NORTH);
-        bottomPanel.add(totalLabel, BorderLayout.SOUTH);
+        bottomPanel.add(totalLabel,  BorderLayout.SOUTH);
         add(bottomPanel, BorderLayout.SOUTH);
     }
 
-    /** Charge et affiche uniquement les lignes de la commande de l’utilisateur */
+    /** Charge les lignes de la commande en cours uniquement. */
     private void chargerPanier() {
         DefaultTableModel model = (DefaultTableModel) table.getModel();
         model.setRowCount(0);
 
-        List<Panier> list = panierDAO.getPanier(commandeId);
+        List<Panier> liste = panierDAO.getPanier(commandeId);
         double total = 0;
-        for (Panier item : list) {
-            double sous = item.getPrix() * item.getQuantite();
-            total += sous;
+
+        for (Panier item : liste) {
+            double prixUnitaire = item.getPrix();
+            int    qteTotale    = item.getQuantite();
+            // remise tous les 10 => 2 offerts
+            int    offres      = (qteTotale / 10) * 2;
+            int    facturables = qteTotale - offres;
+            double sousTotal   = facturables * prixUnitaire;
+            total += sousTotal;
+
+            String txtSous = String.format("%.2f €", sousTotal);
+            if (offres > 0) {
+                txtSous += String.format("  (offerts: %d)", offres);
+            }
+
             model.addRow(new Object[]{
                     item.getNom(),
-                    String.format("%.2f €", item.getPrix()),
-                    item.getQuantite(),
-                    String.format("%.2f €", sous)
+                    String.format("%.2f €", prixUnitaire),
+                    qteTotale,
+                    txtSous
             });
         }
+
         totalLabel.setText(String.format("Total : %.2f €", total));
     }
 }
