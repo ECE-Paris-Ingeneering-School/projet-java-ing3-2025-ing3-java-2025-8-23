@@ -11,23 +11,32 @@ import javax.imageio.ImageIO;
 import Modele.ProduitImage;
 import Modele.ModeleImage;
 
+/**
+ * Classe représentant la page d'accueil de l'application e-commerce
+ */
 public class PageAccueil extends JFrame {
 
+    // Couleurs utilisées dans l'interface
     private final Color PRIMARY_COLOR = new Color(30, 30, 45);
     private final Color SECONDARY_COLOR = new Color(220, 53, 69);
     private final Color ACCENT_COLOR = new Color(255, 215, 0);
     private final Color LIGHT_BG = new Color(250, 250, 252);
     private List<ProduitImage> tousLesProduits;
 
+    /**
+     * Constructeur de la page d'accueil
+     */
     public PageAccueil() {
+        // Configuration de base de la fenêtre
         setTitle("Java Shopping | Mode Tendances 2025");
         setSize(1200, 1000);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
-        // Charger les produits depuis la BDD
+        // Chargement des produits depuis la base de données
         tousLesProduits = ModeleImage.getProduitsDepuisBDD();
 
+        // Création du panel principal avec scroll
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
         mainPanel.setBackground(LIGHT_BG);
@@ -37,6 +46,7 @@ public class PageAccueil extends JFrame {
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
         setContentPane(scrollPane);
 
+        // Ajout des différents composants à l'interface
         mainPanel.add(createHeader());
         mainPanel.add(createBanner());
         mainPanel.add(createTopVentesSection());
@@ -44,12 +54,17 @@ public class PageAccueil extends JFrame {
         mainPanel.add(createFooter());
     }
 
+    /**
+     * Crée le header de la page avec le logo et la navigation
+     * @return JPanel contenant le header
+     */
     private JPanel createHeader() {
         JPanel header = new JPanel(new BorderLayout());
         header.setPreferredSize(new Dimension(1200, 90));
         header.setBackground(Color.WHITE);
         header.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(230, 230, 230)));
 
+        // Création du logo
         JLabel logo = new JLabel("JAVA SHOPPING");
         logo.setFont(new Font("Montserrat", Font.BOLD, 36));
         logo.setForeground(PRIMARY_COLOR);
@@ -64,6 +79,7 @@ public class PageAccueil extends JFrame {
         logoPanel.add(logo);
         logoPanel.add(subLogo);
 
+        // Création de la navigation
         JPanel nav = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
         nav.setOpaque(false);
 
@@ -74,6 +90,7 @@ public class PageAccueil extends JFrame {
             btn.setForeground(PRIMARY_COLOR);
             btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
+            // Effet hover sur les boutons
             btn.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseEntered(MouseEvent e) {
@@ -86,6 +103,7 @@ public class PageAccueil extends JFrame {
                 }
             });
 
+            // Actions des boutons
             btn.addActionListener(e -> {
                 switch (item) {
                     case "Connexion" -> new PageConnexion().setVisible(true);
@@ -101,21 +119,28 @@ public class PageAccueil extends JFrame {
             nav.add(btn);
         }
 
+        // Assemblage du header
         header.add(logoPanel, BorderLayout.WEST);
         header.add(nav, BorderLayout.EAST);
         return header;
     }
 
+    /**
+     * Crée la bannière principale avec image de fond
+     * @return JPanel contenant la bannière
+     */
     private JPanel createBanner() {
         JPanel banner = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 try {
+                    // Chargement et affichage de l'image de fond
                     BufferedImage image = ImageIO.read(new File("src/assets/banner.jpg"));
                     Image scaled = image.getScaledInstance(getWidth(), getHeight(), Image.SCALE_SMOOTH);
                     g.drawImage(scaled, 0, 0, this);
 
+                    // Ajout d'un overlay sombre
                     g.setColor(new Color(0, 0, 0, 120));
                     g.fillRect(0, 0, getWidth(), getHeight());
                 } catch (Exception ex) {
@@ -126,6 +151,7 @@ public class PageAccueil extends JFrame {
         banner.setPreferredSize(new Dimension(1200, 400));
         banner.setLayout(new GridBagLayout());
 
+        // Contenu de la bannière (titre, sous-titre, bouton)
         JPanel content = new JPanel();
         content.setOpaque(false);
         content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
@@ -148,12 +174,14 @@ public class PageAccueil extends JFrame {
         exploreBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         exploreBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
+        // Action du bouton
         exploreBtn.addActionListener(e -> {
             PagePrincipale page = new PagePrincipale();
             page.setVisible(true);
             dispose();
         });
 
+        // Assemblage du contenu
         content.add(titre);
         content.add(Box.createRigidArea(new Dimension(0, 15)));
         content.add(sousTitre);
@@ -164,32 +192,40 @@ public class PageAccueil extends JFrame {
         return banner;
     }
 
+    /**
+     * Crée la section des meilleures ventes
+     * @return JPanel contenant la section
+     */
     private JPanel createTopVentesSection() {
         JPanel section = new JPanel();
         section.setBackground(LIGHT_BG);
         section.setLayout(new BorderLayout());
         section.setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
 
+        // Titre de la section
         JLabel title = new JLabel("NOS TOP VENTES", JLabel.CENTER);
         title.setFont(new Font("Montserrat", Font.BOLD, 28));
         title.setForeground(PRIMARY_COLOR);
         section.add(title, BorderLayout.NORTH);
 
+        // Panel pour les produits
         JPanel produitsPanel = new JPanel();
         produitsPanel.setLayout(new BoxLayout(produitsPanel, BoxLayout.X_AXIS));
         produitsPanel.setBackground(LIGHT_BG);
         produitsPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
 
-        // Sélectionner 4 produits aléatoires
+        // Sélection de 4 produits aléatoires
         Collections.shuffle(tousLesProduits);
         List<ProduitImage> produitsAleatoires = tousLesProduits.subList(0, Math.min(4, tousLesProduits.size()));
 
+        // Création des cartes produits
         for (ProduitImage produit : produitsAleatoires) {
             produitsPanel.add(Box.createHorizontalStrut(20));
             produitsPanel.add(createProductCard(produit));
         }
         produitsPanel.add(Box.createHorizontalStrut(20));
 
+        // Ajout du scrolling horizontal
         JScrollPane scrollPane = new JScrollPane(produitsPanel);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
@@ -199,6 +235,11 @@ public class PageAccueil extends JFrame {
         return section;
     }
 
+    /**
+     * Crée une carte produit individuelle
+     * @param produit Le produit à afficher
+     * @return JPanel représentant la carte produit
+     */
     private JPanel createProductCard(ProduitImage produit) {
         JPanel card = new JPanel(new BorderLayout());
         card.setPreferredSize(new Dimension(250, 300));
@@ -228,7 +269,7 @@ public class PageAccueil extends JFrame {
         }
         card.add(imageLabel, BorderLayout.CENTER);
 
-        // Info du produit
+        // Informations du produit (nom, prix)
         JPanel infoPanel = new JPanel();
         infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
         infoPanel.setOpaque(false);
@@ -249,13 +290,13 @@ public class PageAccueil extends JFrame {
 
         card.add(infoPanel, BorderLayout.SOUTH);
 
-        // Action lors du clic
+        // Gestion des interactions
         card.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 PagePrincipale page = new PagePrincipale();
                 page.setVisible(true);
-                // Trouver la catégorie à partir du nom du produit
+                // Filtrage par catégorie
                 String categorie = trouverCategorie(produit.getNom());
                 if (categorie != null) {
                     filtrerPagePrincipale(page, categorie);
@@ -283,6 +324,11 @@ public class PageAccueil extends JFrame {
         return card;
     }
 
+    /**
+     * Détermine la catégorie d'un produit à partir de son nom
+     * @param nomProduit Le nom du produit
+     * @return La catégorie trouvée ou null
+     */
     private String trouverCategorie(String nomProduit) {
         String nomLower = nomProduit.toLowerCase();
         if (nomLower.contains("pantalon")) return "Pantalon";
@@ -293,21 +339,29 @@ public class PageAccueil extends JFrame {
         return null;
     }
 
+    /**
+     * Filtre la page principale par catégorie
+     * @param page La page principale
+     * @param categorie La catégorie à filtrer
+     */
     private void filtrerPagePrincipale(PagePrincipale page, String categorie) {
-        // Utilise la réflexion pour accéder à la méthode privée si nécessaire
         try {
+            // Utilisation de la réflexion pour accéder à la méthode privée
             java.lang.reflect.Method method = PagePrincipale.class.getDeclaredMethod("filtrerParCategorie", String.class);
             method.setAccessible(true);
             method.invoke(page, categorie);
         } catch (Exception e) {
             System.err.println("Erreur lors du filtrage: " + e.getMessage());
-            // Alternative: simuler un clic sur le bouton de catégorie
             simulerClicCategorie(page, categorie);
         }
     }
 
+    /**
+     * Simule un clic sur le bouton de catégorie si la méthode réflexion échoue
+     * @param page La page principale
+     * @param categorie La catégorie à sélectionner
+     */
     private void simulerClicCategorie(PagePrincipale page, String categorie) {
-        // Parcourt tous les composants pour trouver le bon bouton
         for (Component comp : page.getContentPane().getComponents()) {
             if (comp instanceof JPanel) {
                 for (Component subComp : ((JPanel) comp).getComponents()) {
@@ -323,21 +377,27 @@ public class PageAccueil extends JFrame {
         }
     }
 
+    /**
+     * Crée la section des catégories
+     * @return JPanel contenant la section
+     */
     private JPanel createCategoriesSection() {
         JPanel section = new JPanel(new BorderLayout());
         section.setBackground(LIGHT_BG);
         section.setBorder(BorderFactory.createEmptyBorder(0, 0, 30, 0));
 
+        // Titre de la section
         JLabel title = new JLabel("NOS CATÉGORIES", JLabel.CENTER);
         title.setFont(new Font("Montserrat", Font.BOLD, 28));
         title.setForeground(PRIMARY_COLOR);
         section.add(title, BorderLayout.NORTH);
 
+        // Panel pour les catégories
         JPanel categories = new JPanel(new GridLayout(1, 5, 15, 0));
         categories.setBackground(LIGHT_BG);
         categories.setBorder(BorderFactory.createEmptyBorder(20, 40, 40, 40));
 
-        // Les 5 catégories principales
+        // Ajout des cartes catégories
         categories.add(createCategoryCard("PANTALON", "src/assets/pantalon.jpg", "Pantalon"));
         categories.add(createCategoryCard("T-SHIRT", "src/assets/tshirt.jpg", "T-Shirt"));
         categories.add(createCategoryCard("SWEAT", "src/assets/sweat.jpg", "Sweat"));
@@ -348,16 +408,25 @@ public class PageAccueil extends JFrame {
         return section;
     }
 
+    /**
+     * Crée une carte de catégorie individuelle
+     * @param titre Le titre de la catégorie
+     * @param imgPath Le chemin de l'image
+     * @param categorie Le nom de la catégorie
+     * @return JPanel représentant la carte catégorie
+     */
     private JPanel createCategoryCard(String titre, String imgPath, String categorie) {
         JPanel card = new JPanel(new BorderLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 try {
+                    // Chargement et affichage de l'image de fond
                     BufferedImage img = ImageIO.read(new File(imgPath));
                     Image scaled = img.getScaledInstance(getWidth(), getHeight(), Image.SCALE_SMOOTH);
                     g.drawImage(scaled, 0, 0, this);
 
+                    // Ajout d'un overlay sombre
                     g.setColor(new Color(0, 0, 0, 70));
                     g.fillRect(0, 0, getWidth(), getHeight());
                 } catch (Exception ex) {
@@ -370,6 +439,7 @@ public class PageAccueil extends JFrame {
         card.setPreferredSize(new Dimension(200, 220));
         card.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
+        // Titre de la catégorie
         JLabel label = new JLabel(titre);
         label.setFont(new Font("Montserrat", Font.BOLD, 18));
         label.setForeground(Color.WHITE);
@@ -378,6 +448,7 @@ public class PageAccueil extends JFrame {
 
         card.add(label, BorderLayout.SOUTH);
 
+        // Gestion des interactions
         card.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -401,20 +472,83 @@ public class PageAccueil extends JFrame {
         return card;
     }
 
+    /**
+     * Crée le footer de la page
+     * @return JPanel contenant le footer
+     */
     private JPanel createFooter() {
         JPanel footer = new JPanel();
         footer.setPreferredSize(new Dimension(1200, 80));
         footer.setBackground(new Color(240, 240, 240));
         footer.setLayout(new GridBagLayout());
 
-        JLabel label = new JLabel("© 2025 Java Shopping | Tous droits réservés | Mentions légales | Contact");
-        label.setFont(new Font("SansSerif", Font.PLAIN, 12));
-        label.setForeground(Color.DARK_GRAY);
-        footer.add(label);
+        JPanel linksPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
+        linksPanel.setOpaque(false);
 
+        // Copyright
+        JLabel copyright = new JLabel("© 2025 Java Shopping | Tous droits réservés | ");
+        copyright.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        copyright.setForeground(Color.DARK_GRAY);
+
+        // Liens cliquables
+        JLabel mentionsLegales = createClickableLabel("Mentions légales", () -> {
+            new PageMentionsLegales().setVisible(true);
+            dispose();
+        });
+
+        JLabel contact = createClickableLabel("Contact", () -> {
+            new PageContact().setVisible(true);
+            dispose();
+        });
+
+        // Assemblage des éléments
+        linksPanel.add(copyright);
+        linksPanel.add(mentionsLegales);
+        linksPanel.add(new JLabel("|"));
+        linksPanel.add(contact);
+
+        footer.add(linksPanel);
         return footer;
     }
 
+    /**
+     * Crée un label cliquable
+     * @param text Le texte du label
+     * @param action L'action à exécuter au clic
+     * @return Le label créé
+     */
+    private JLabel createClickableLabel(String text, Runnable action) {
+        JLabel label = new JLabel(text);
+        label.setFont(new Font("SansSerif", Font.BOLD, 12));
+        label.setForeground(PRIMARY_COLOR);
+        label.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        // Gestion des interactions
+        label.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                action.run();
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                label.setForeground(SECONDARY_COLOR);
+                label.setText("<html><u>" + text + "</u></html>");
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                label.setForeground(PRIMARY_COLOR);
+                label.setText(text);
+            }
+        });
+
+        return label;
+    }
+
+    /**
+     * Classe interne pour les boutons stylisés
+     */
     private static class StyledButton extends JButton {
         public StyledButton(String text) {
             super(text);
@@ -425,6 +559,9 @@ public class PageAccueil extends JFrame {
         }
     }
 
+    /**
+     * Méthode principale pour lancer l'application
+     */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new PageAccueil().setVisible(true));
     }
