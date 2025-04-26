@@ -49,7 +49,7 @@ public class PageAdmin extends JFrame {
         btnDeco.addActionListener(e -> {
             Session.clear();
             for (Window w : Window.getWindows()) w.dispose();
-            new PageConnexion().setVisible(true);
+            new PageAccueil().setVisible(true);
         });
         JPanel sud = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         sud.add(btnDeco);

@@ -1,9 +1,6 @@
 package Controleur;
 
-import Vue.PageConnexion;
-import Vue.PageInscription;
-import Vue.PagePrincipale;
-import Vue.PageAdmin;
+import Vue.*;
 import DAO.UtilisateurDAO;
 import Modele.Utilisateur;
 import Utilitaires.Session;
@@ -79,11 +76,16 @@ public class PageConnexionControleur {
 
             // 6) Redirection selon rang
             if (user.getRang() == 0) {
+                for (java.awt.Window window : java.awt.Window.getWindows()) {
+                    window.dispose();
+                }
                 new PageAdmin().setVisible(true);
             } else {
-                new PagePrincipale().setVisible(true);
+                for (java.awt.Window window : java.awt.Window.getWindows()) {
+                    window.dispose();
+                }
+                new PageAccueil().setVisible(true);
             }
-            vueConnexion.dispose();
 
         } else {
             JOptionPane.showMessageDialog(

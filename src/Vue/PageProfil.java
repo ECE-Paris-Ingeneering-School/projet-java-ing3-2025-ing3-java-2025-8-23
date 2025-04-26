@@ -87,7 +87,7 @@ public class PageProfil extends JFrame {
         btnDeconnexion.addActionListener(e -> {
             Session.clear();
             for (Window w : Window.getWindows()) w.dispose();
-            new PageConnexion().setVisible(true);
+            new PageAccueil().setVisible(true);
         });
 
         formPanel.revalidate();

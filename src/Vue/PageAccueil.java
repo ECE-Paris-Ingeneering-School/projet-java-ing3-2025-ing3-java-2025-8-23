@@ -10,8 +10,23 @@ import java.util.List;
 import javax.imageio.ImageIO;
 import Modele.Article;
 import DAO.ArticlesDAO;
+import Utilitaires.Session;
+
 
 public class PageAccueil extends JFrame {
+
+    private boolean utilisateurEstConnecte() {
+        return Utilitaires.Session.getUtilisateur() != null;
+    }
+
+    private void afficherMessageConnexionRequise() {
+        JOptionPane.showMessageDialog(
+                this,
+                "Veuillez vous connecter pour accéder au catalogue.",
+                "Connexion requise",
+                JOptionPane.WARNING_MESSAGE
+        );
+    }
 
     private final Color PRIMARY_COLOR = new Color(30, 30, 45);
     private final Color SECONDARY_COLOR = new Color(220, 53, 69);
@@ -98,10 +113,15 @@ public class PageAccueil extends JFrame {
                     case "Connexion" -> new PageConnexion().setVisible(true);
                     case "Inscription" -> new PageInscription().setVisible(true);
                     case "Catalogue" -> {
+                        if (!utilisateurEstConnecte()) {
+                            afficherMessageConnexionRequise();
+                            return;
+                        }
                         PagePrincipale page = new PagePrincipale();
                         page.setVisible(true);
                         dispose();
                     }
+
                 }
             });
 
@@ -125,7 +145,7 @@ public class PageAccueil extends JFrame {
                 super.paintComponent(g);
                 try {
                     // Chargement et affichage de l'image de fond
-                    BufferedImage image = ImageIO.read(new File("../assets/banner.jpg"));
+                    BufferedImage image = ImageIO.read(new File("src/assets/banner.jpg"));
                     Image scaled = image.getScaledInstance(getWidth(), getHeight(), Image.SCALE_SMOOTH);
                     g.drawImage(scaled, 0, 0, this);
 
@@ -165,10 +185,15 @@ public class PageAccueil extends JFrame {
 
         // Action du bouton
         exploreBtn.addActionListener(e -> {
+            if (!utilisateurEstConnecte()) {
+                afficherMessageConnexionRequise();
+                return;
+            }
             PagePrincipale page = new PagePrincipale();
             page.setVisible(true);
             dispose();
         });
+
 
         // Assemblage du contenu
         content.add(titre);
@@ -266,6 +291,10 @@ public class PageAccueil extends JFrame {
         card.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                if (!utilisateurEstConnecte()) {
+                    afficherMessageConnexionRequise();
+                    return;
+                }
                 PagePrincipale page = new PagePrincipale();
                 page.setVisible(true);
                 String categorie = trouverCategorie(produit.getNom());
@@ -423,11 +452,16 @@ public class PageAccueil extends JFrame {
         card.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                if (!utilisateurEstConnecte()) {
+                    afficherMessageConnexionRequise();
+                    return;
+                }
                 PagePrincipale page = new PagePrincipale();
                 page.setVisible(true);
                 filtrerPagePrincipale(page, categorie);
                 dispose();
             }
+
 
             @Override
             public void mouseEntered(MouseEvent e) {

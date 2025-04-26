@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : localhost:8889
--- Généré le : ven. 25 avr. 2025 à 14:01
+-- Généré le : sam. 26 avr. 2025 à 11:21
 -- Version du serveur : 5.7.24
 -- Version de PHP : 8.3.1
 
@@ -77,7 +77,10 @@ INSERT INTO `commandes` (`id`, `utilisateur_id`, `date_commande`, `total`, `vali
 (4, 2, '2025-04-24 22:00:00', '205.00', 1),
 (5, 2, '2025-04-25 10:46:40', '1040.00', 1),
 (6, 2, '2025-04-25 10:47:14', '180.00', 1),
-(7, 2, '2025-04-25 10:55:40', '0.00', 0);
+(7, 2, '2025-04-25 10:55:40', '130.00', 1),
+(8, 2, '2025-04-26 10:22:38', '0.00', 0),
+(9, 4, '2025-04-26 10:59:06', '160.00', 1),
+(10, 4, '2025-04-26 11:00:24', '0.00', 0);
 
 -- --------------------------------------------------------
 
@@ -100,7 +103,9 @@ INSERT INTO `panier` (`id`, `commande_id`, `article_id`, `quantite`) VALUES
 (18, 4, 1, 1),
 (19, 4, 2, 1),
 (20, 5, 4, 10),
-(21, 6, 5, 4);
+(21, 6, 5, 4),
+(22, 7, 4, 1),
+(23, 9, 3, 10);
 
 -- --------------------------------------------------------
 
@@ -126,7 +131,8 @@ CREATE TABLE `utilisateurs` (
 INSERT INTO `utilisateurs` (`id`, `prenom`, `nom`, `email`, `mot_de_passe`, `adresse`, `date_inscription`, `rang`) VALUES
 (1, 'jufire', 'feniu', 'j', 'j', 'fre', '2025-04-17 15:14:31', 0),
 (2, 'Quentin', 'Lory', 'b', 'b', '11 Rue de Strasbourg', '2025-04-23 15:25:01', 1),
-(3, 'jicow', 'fewk', 'ilhan', 'ilhan', 'c', '2025-04-23 15:25:21', 1);
+(3, 'jicow', 'fewk', 'ilhan', 'ilhan', 'c', '2025-04-23 15:25:21', 1),
+(4, 'Q', 'Q', 'q', 'q', 'q', '2025-04-26 10:58:57', 1);
 
 --
 -- Index pour les tables déchargées
@@ -174,19 +180,19 @@ ALTER TABLE `articles`
 -- AUTO_INCREMENT pour la table `commandes`
 --
 ALTER TABLE `commandes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT pour la table `panier`
 --
 ALTER TABLE `panier`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT pour la table `utilisateurs`
 --
 ALTER TABLE `utilisateurs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- Contraintes pour les tables déchargées

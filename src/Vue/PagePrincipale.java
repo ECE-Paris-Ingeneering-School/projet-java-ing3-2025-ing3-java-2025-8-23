@@ -24,7 +24,7 @@ public class PagePrincipale extends JFrame {
     public PagePrincipale() {
         Utilisateur user = Session.getUtilisateur();
 
-        setTitle("Boutique Shopping - Accueil");
+        setTitle("JAVA SHOPPING");
         setSize(1000, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -34,10 +34,18 @@ public class PagePrincipale extends JFrame {
         JPanel panelEntete = new JPanel(new BorderLayout());
         panelEntete.setBackground(new Color(255, 153, 0));
 
-        JLabel labelLogo = new JLabel("Ma Boutique");
+        JLabel labelLogo = new JLabel("JAVA SHOPPING");
         labelLogo.setFont(new Font("SansSerif", Font.BOLD, 24));
         labelLogo.setForeground(Color.WHITE);
         labelLogo.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        labelLogo.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        labelLogo.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                dispose(); // ferme la page actuelle
+                new PageAccueil().setVisible(true); // retourne à l’accueil
+            }
+        });
         panelEntete.add(labelLogo, BorderLayout.WEST);
 
         JPanel centerSearchPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
