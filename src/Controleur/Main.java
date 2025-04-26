@@ -1,9 +1,12 @@
+package Controleur;
+
+import Vue.PageConnexion;
 import javax.swing.SwingUtilities;
 
 public class Main {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            new Catalogue().setVisible(true);
+            new PageConnexion().setVisible(true);
         });
     }
 }
