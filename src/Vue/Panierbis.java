@@ -1,18 +1,21 @@
 package Vue;
 
+import DAO.CommandeDAO;
 import DAO.PanierDAO;
 import Modele.Panier;
+import Modele.Utilisateur;
+import Utilitaires.Session;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
-import javax.swing.table.DefaultTableModel;
 
 public class Panierbis extends JFrame {
-
     private JTable table;
     private JLabel totalLabel;
     private PanierDAO panierDAO;
+    private int commandeId;
 
     public Panierbis() {
         setTitle("Votre Panier");
@@ -20,144 +23,125 @@ public class Panierbis extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
+        // Récupère la commande non payée de l'utilisateur
+        Utilisateur user = Session.getUtilisateur();
+        commandeId = new CommandeDAO().getOuCreateCommandeEnCours(user.getId());
+
         panierDAO = new PanierDAO();
         initUI();
         chargerPanier();
-
     }
 
     private void initUI() {
         setLayout(new BorderLayout());
 
-        // Modèle de table pour le panier
+        // Tableau non éditable
         String[] columns = {"Article", "Prix unitaire", "Quantité", "Sous-total"};
         DefaultTableModel model = new DefaultTableModel(columns, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
+            @Override public boolean isCellEditable(int row, int col) { return false; }
         };
-
         table = new JTable(model);
         add(new JScrollPane(table), BorderLayout.CENTER);
 
-        // Panel pour les boutons et le total
+        // Bas de page : boutons + total
         JPanel bottomPanel = new JPanel(new BorderLayout());
-
-        // Boutons
         JPanel buttonPanel = new JPanel();
 
+        // Supprimer un article
         JButton supprimerBtn = new JButton("Supprimer");
-        supprimerBtn.addActionListener(e -> supprimerArticle());
+        supprimerBtn.addActionListener(e -> {
+            int sel = table.getSelectedRow();
+            if (sel >= 0) {
+                List<Panier> list = panierDAO.getPanier(commandeId);
+                int idPanier = list.get(sel).getId();
+                panierDAO.supprimerArticle(idPanier);
+                chargerPanier();
+            } else {
+                JOptionPane.showMessageDialog(this, "Sélectionnez un article.");
+            }
+        });
 
+        // Vider la commande en cours
         JButton viderBtn = new JButton("Vider le panier");
-        viderBtn.addActionListener(e -> viderPanier());
+        viderBtn.addActionListener(e -> {
+            if (JOptionPane.showConfirmDialog(
+                    this,
+                    "Vider entièrement votre panier ?",
+                    "Confirmation",
+                    JOptionPane.YES_NO_OPTION
+            ) == JOptionPane.YES_OPTION) {
+                panierDAO.viderPanierCommande(commandeId);  // méthode à ajouter en DAO
+                chargerPanier();
+            }
+        });
 
+        // Continuer les achats
         JButton retourBtn = new JButton("Continuer mes achats");
-        retourBtn.addActionListener(e -> this.dispose());
+        retourBtn.addActionListener(e -> {
+            dispose();
+            SwingUtilities.invokeLater(() -> new PagePrincipale().setVisible(true));
+        });
+
+        // Passer au paiement
+        JButton payerBtn = new JButton("Passer au paiement");
+        payerBtn.setBackground(new Color(76, 175, 80));
+        payerBtn.setForeground(Color.WHITE);
+        payerBtn.setFont(payerBtn.getFont().deriveFont(Font.BOLD));
+        payerBtn.addActionListener(e -> {
+            double total = panierDAO.getPanier(commandeId).stream()
+                    .mapToDouble(item -> item.getPrix() * item.getQuantite())
+                    .sum();
+            if (total <= 0) {
+                JOptionPane.showMessageDialog(this, "Panier vide !", "Erreur", JOptionPane.WARNING_MESSAGE);
+            } else {
+                dispose();
+                SwingUtilities.invokeLater(() -> new Paiementbis().setVisible(true));
+            }
+        });
 
         buttonPanel.add(supprimerBtn);
         buttonPanel.add(viderBtn);
         buttonPanel.add(retourBtn);
-
-        JButton payerBtn = new JButton("Passer au paiement");
-        payerBtn.setBackground(new Color(76, 175, 80)); // Vert
-        payerBtn.setForeground(Color.WHITE);
-        payerBtn.setFont(payerBtn.getFont().deriveFont(Font.BOLD));
-        payerBtn.addActionListener(e -> ouvrirFenetrePaiement());
-
         buttonPanel.add(payerBtn);
 
-        // Total
         totalLabel = new JLabel("Total : 0.00 €", JLabel.RIGHT);
         totalLabel.setFont(new Font("Arial", Font.BOLD, 16));
 
         bottomPanel.add(buttonPanel, BorderLayout.NORTH);
-        bottomPanel.add(totalLabel, BorderLayout.SOUTH);
-
+        bottomPanel.add(totalLabel,  BorderLayout.SOUTH);
         add(bottomPanel, BorderLayout.SOUTH);
     }
 
-    private void chargerPanier() {  // Renommé de changerPanier() à chargerPanier() pour plus de clarté
+    /** Charge les lignes de la commande en cours uniquement. */
+    private void chargerPanier() {
         DefaultTableModel model = (DefaultTableModel) table.getModel();
-        model.setRowCount(0); // Vide la table
+        model.setRowCount(0);
 
-        List<Panier> panier = panierDAO.getPanier();
+        List<Panier> liste = panierDAO.getPanier(commandeId);
         double total = 0;
 
-        for (Panier item : panier) {
-            double sousTotal = item.getPrix() * item.getQuantite();
+        for (Panier item : liste) {
+            double prixUnitaire = item.getPrix();
+            int    qteTotale    = item.getQuantite();
+            // remise tous les 10 => 2 offerts
+            int    offres      = (qteTotale / 10) * 2;
+            int    facturables = qteTotale - offres;
+            double sousTotal   = facturables * prixUnitaire;
             total += sousTotal;
+
+            String txtSous = String.format("%.2f €", sousTotal);
+            if (offres > 0) {
+                txtSous += String.format("  (offerts: %d)", offres);
+            }
 
             model.addRow(new Object[]{
                     item.getNom(),
-                    String.format("%.2f €", item.getPrix()),  // Correction: virgule au lieu de point-virgule
-                    item.getQuantite(),
-                    String.format("%.2f €", sousTotal)
+                    String.format("%.2f €", prixUnitaire),
+                    qteTotale,
+                    txtSous
             });
         }
 
         totalLabel.setText(String.format("Total : %.2f €", total));
-    }
-
-    private void supprimerArticle() {
-        int selectedRow = table.getSelectedRow();
-        if (selectedRow >= 0) {
-            DefaultTableModel model = (DefaultTableModel) table.getModel();
-            // Correction: récupérer l'ID différemment car la table affiche des Strings
-            // Vous devez soit:
-            // 1. Stocker les IDs dans un tableau séparé
-            // 2. Ou mieux, récupérer l'ID depuis la liste des paniers
-            List<Panier> panier = panierDAO.getPanier();
-            if (selectedRow < panier.size()) {
-                int id = panier.get(selectedRow).getId();
-                panierDAO.supprimerArticle(id);
-                chargerPanier();
-            }
-        } else {
-            JOptionPane.showMessageDialog(this, "Veuillez sélectionner un article à supprimer.");
-        }
-    }
-
-    private void viderPanier() {
-        int confirm = JOptionPane.showConfirmDialog(
-                this,
-                "Voulez-vous vraiment vider votre panier ?",
-                "Confirmation",
-                JOptionPane.YES_NO_OPTION
-        );
-
-        if (confirm == JOptionPane.YES_OPTION) {
-            panierDAO.viderPanier();
-            chargerPanier();
-        }
-    }
-
-    private void ouvrirFenetrePaiement() {
-        // Calculer le total
-        double total = 0;
-        List<Panier> panier = panierDAO.getPanier();
-        for (Panier item : panier) {
-            total += item.getPrix() * item.getQuantite();
-        }
-
-        if (total <= 0) {
-            JOptionPane.showMessageDialog(this,
-                    "Votre panier est vide !",
-                    "Panier vide",
-                    JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        // Calculer le total juste avant le lambda
-        double paymentTotal = panierDAO.getPanier().stream()
-                .mapToDouble(p -> p.getPrix() * p.getQuantite())
-                .sum();
-
-        SwingUtilities.invokeLater(() -> {
-            new Paiementbis(paymentTotal).setVisible(true);
-        });
-
-
-        this.dispose();
     }
 }

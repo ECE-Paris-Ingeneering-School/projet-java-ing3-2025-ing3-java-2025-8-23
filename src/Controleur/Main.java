@@ -1,30 +1,28 @@
 package Controleur;
 
+import Vue.PageAccueil;
 import Vue.PageConnexion;
 import javax.swing.SwingUtilities;
 
-public class Main {
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            new PageConnexion().setVisible(true);
-        });
-    }
-}
-
-
-/*import DAO.PanierDAO;
-import Vue.Panierbis;
-
-public class Main {
-    public static void main(String[] args) {
-        PanierDAO dao = new PanierDAO();
-
-        dao.ajouterProduit(1, 2); // ajoute produit avec id=1, quantité=2
-        dao.ajouterProduit(2, 1); // ajoute produit avec id=2, quantité=1
-
-        Panierbis vuePanier = new Panierbis();
-        vuePanier.afficherPanier();
-    }
-}
-
+/**
+ * C'est la classe principale du projet
+ * <p>
+ * Elle permet de lancer l'application en ouvrant la page d'accueil
+ * </p>
+ *
+ * @author groupe 23 TD8
  */
+public class  Main {
+
+    /**
+     * Methode principale du programme
+     * <p>
+     * Elle utilise {@code SwingUtilities.invokeLater} pour etre sur que
+     * l'interface graphique est créée,
+     * ce qui est permet d'éviter des bugs d'affichage en java swing
+     * </p>
+     */
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new PageAccueil().setVisible(true));
+    }
+}
