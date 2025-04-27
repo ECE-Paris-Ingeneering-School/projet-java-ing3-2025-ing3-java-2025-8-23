@@ -13,6 +13,8 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 /**
@@ -82,6 +84,7 @@ public class PageAdmin extends JFrame {
 
     /**
      * Construit le panel de gestion des articles.
+     *
      * @return JPanel configuré avec les composants nécessaires
      */
     private JPanel buildInventairePanel() {
@@ -111,7 +114,7 @@ public class PageAdmin extends JFrame {
             if (sel < 0) return;
             int id = (int) modelArticles.getValueAt(sel, 0);
             if (JOptionPane.showConfirmDialog(this,
-                    "Supprimer cet article ?","Confirmez",
+                    "Supprimer cet article ?", "Confirmez",
                     JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
                 articlesDAO.supprimerArticle(id);
                 reloadArticles();
@@ -122,7 +125,7 @@ public class PageAdmin extends JFrame {
     }
 
     /**
-     * Recharge la liste des articles depuis la BDD
+     * Recharge la liste des articles depuis la BDD.
      */
     private void reloadArticles() {
         modelArticles.setRowCount(0);
@@ -140,16 +143,16 @@ public class PageAdmin extends JFrame {
 
     /**
      * Ouvre une boîte de dialogue pour ajouter ou modifier un article.
-     *  @param art L'article à modifier
+     *
+     * @param art L'article à modifier (ou {@code null} pour une création)
      */
     private void openArticleDialog(Article art) {
         boolean isNew = (art == null);
         JDialog dlg = new JDialog(this,
                 isNew ? "Ajouter un article" : "Modifier l'article", true);
-        dlg.setSize(400,350);
+        dlg.setSize(400, 400);
         dlg.setLocationRelativeTo(this);
 
-        // création du formulaire
         JPanel p = new JPanel(new GridLayout(0,2,5,5));
         p.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
 
@@ -165,7 +168,33 @@ public class PageAdmin extends JFrame {
         p.add(new JLabel("Prix :"));       p.add(fPrix);
         p.add(new JLabel("Stock :"));      p.add(fStock);
 
-        // boutons de validation
+        // Gestion de l'image
+        JLabel lblImage = new JLabel(isNew ? "Aucune image sélectionnée" : "Image existante");
+        JButton btnChoisirImage = new JButton("Choisir une image");
+        final byte[][] imageBytes = new byte[1][];
+
+        btnChoisirImage.addActionListener(event -> {
+            JFileChooser fileChooser = new JFileChooser();
+            int result = fileChooser.showOpenDialog(dlg);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                try {
+                    java.io.File file = fileChooser.getSelectedFile();
+                    lblImage.setText(file.getName());
+                    Path path = file.toPath();
+                    imageBytes[0] = Files.readAllBytes(path);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(dlg, "Erreur lors du chargement de l'image.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        p.add(new JLabel("Image :"));
+        JPanel imgPanel = new JPanel(new BorderLayout());
+        imgPanel.add(btnChoisirImage, BorderLayout.WEST);
+        imgPanel.add(lblImage, BorderLayout.CENTER);
+        p.add(imgPanel);
+
         JButton ok = new JButton("OK");
         JButton cancel = new JButton("Annuler");
         JPanel bp = new JPanel();
@@ -174,6 +203,10 @@ public class PageAdmin extends JFrame {
 
         ok.addActionListener(e -> {
             try {
+                byte[] image = imageBytes[0];
+                if (!isNew && image == null) {
+                    image = art.getImage(); // conserver l'image actuelle si aucune nouvelle sélectionnée
+                }
                 Article x = new Article(
                         isNew ? 0 : art.getId(),
                         fNom.getText().trim(),
@@ -181,7 +214,7 @@ public class PageAdmin extends JFrame {
                         fDesc.getText().trim(),
                         Double.parseDouble(fPrix.getText().trim()),
                         Integer.parseInt(fStock.getText().trim()),
-                        null
+                        image
                 );
                 if (isNew) articlesDAO.createArticle(x);
                 else articlesDAO.updateArticle(x);
@@ -236,6 +269,7 @@ public class PageAdmin extends JFrame {
 
     /**
      * Construit le panel de gestion des commandes.
+     *
      * @return JPanel configuré avec les composants nécessaires
      */
     private JPanel buildClientsPanel() {
@@ -256,7 +290,7 @@ public class PageAdmin extends JFrame {
     }
 
     /**
-     * Recharge la liste des commandes depuis la BDD
+     * Recharge la liste des commandes depuis la BDD.
      */
     private void reloadCommandes() {
         modelCommandes.setRowCount(0);
