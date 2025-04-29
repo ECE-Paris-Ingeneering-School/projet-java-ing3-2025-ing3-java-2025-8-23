@@ -1,3 +1,4 @@
+//https://openclassrooms.com/fr/courses/6982461-utilisez-spring-data-pour-interagir-avec-vos-bases-de-donnees/7202741-identifiez-les-avantages-de-java-pour-communiquer-avec-une-bdd
 package Utilitaires;
 
 import java.sql.Connection;
