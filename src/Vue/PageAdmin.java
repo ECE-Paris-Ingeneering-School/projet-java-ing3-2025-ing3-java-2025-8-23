@@ -45,6 +45,7 @@ public class PageAdmin extends JFrame {
         Utilisateur admin = Session.getUtilisateur();
         setTitle("Admin Dashboard - " + admin.getPrenom() + " " + admin.getNom());
         setSize(1000, 600);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
@@ -337,7 +338,7 @@ public class PageAdmin extends JFrame {
      *
      * @return Un JPanel contenant la table des statistiques.
      */
-    
+
     private JPanel buildStatsPanel() {
         JPanel pnl = new JPanel(new BorderLayout(10,10));
         pnl.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));

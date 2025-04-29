@@ -37,6 +37,7 @@ public class PagePrincipale extends JFrame {
 
         setTitle("JAVA SHOPPING");
         setSize(1000, 600);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());

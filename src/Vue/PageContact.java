@@ -24,6 +24,7 @@ public class PageContact extends JFrame {
     public PageContact() {
         setTitle("Java Shopping - Contact");
         setSize(1000, 700);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setLocationRelativeTo(null); // Centre la fenêtre
         setDefaultCloseOperation(DISPOSE_ON_CLOSE); // Ferme uniquement cette fenêtre
 

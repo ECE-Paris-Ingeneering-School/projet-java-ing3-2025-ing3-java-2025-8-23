@@ -51,7 +51,8 @@ public class PageAccueil extends JFrame {
 
     public PageAccueil() {
         setTitle("Java Shopping | Mode Tendances 2025");
-        setSize(1200, 1000);
+        setSize(1920, 1080);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 

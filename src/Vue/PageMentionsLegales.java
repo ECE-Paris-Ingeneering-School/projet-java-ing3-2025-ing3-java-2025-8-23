@@ -22,6 +22,7 @@ public class PageMentionsLegales extends JFrame {
     public PageMentionsLegales() {
         setTitle("Java Shopping - Mentions Légales");
         setSize(1000, 700);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 

@@ -20,6 +20,7 @@ public class Panierbis extends JFrame {
     public Panierbis() {
         setTitle("Votre Panier");
         setSize(600, 400);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 

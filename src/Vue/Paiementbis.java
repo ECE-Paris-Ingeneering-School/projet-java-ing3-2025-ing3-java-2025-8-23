@@ -40,6 +40,7 @@ public class Paiementbis extends JFrame {
 
         setTitle("Paiement de la commande n°" + commandeId);
         setSize(500, 350);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
