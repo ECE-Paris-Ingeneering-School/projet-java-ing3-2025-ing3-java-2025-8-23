@@ -3,39 +3,17 @@ package DAO;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import Modele.StatistiqueArticle;
 import Utilitaires.ConnectionFactory;
+
 /**
  * DAO permettant de récupérer les statistiques de ventes des articles.
  * Permet de calculer le nombre total d'articles vendus et le chiffre d'affaires généré par article.
  *
  * Utilisé dans la page administrateur pour l'affichage des statistiques.
  */
-
 public class StatistiquesDAO {
-
-    public static class StatistiqueArticle {
-        private String nom;
-        private int quantiteTotale;
-        private double totalGenere;
-
-        public StatistiqueArticle(String nom, int quantiteTotale, double totalGenere) {
-            this.nom = nom;
-            this.quantiteTotale = quantiteTotale;
-            this.totalGenere = totalGenere;
-        }
-
-        public String getNom() {
-            return nom;
-        }
-
-        public int getQuantiteTotale() {
-            return quantiteTotale;
-        }
-
-        public double getTotalGenere() {
-            return totalGenere;
-        }
-    }
 
     /**
      * Récupère les statistiques de ventes pour chaque article.
@@ -43,7 +21,6 @@ public class StatistiquesDAO {
      * @return Une liste d'objets {@code StatistiqueArticle} contenant le nom de l'article,
      *         la quantité totale vendue et le total généré en euros.
      */
-
     public List<StatistiqueArticle> getStatistiquesArticles() {
         List<StatistiqueArticle> stats = new ArrayList<>();
 

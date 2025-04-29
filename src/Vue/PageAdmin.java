@@ -9,6 +9,7 @@ import Modele.Commande;
 import Modele.Panier;
 import Modele.Utilisateur;
 import Utilitaires.Session;
+import Modele.StatistiqueArticle;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -353,7 +354,7 @@ public class PageAdmin extends JFrame {
         JTable tabStats = new JTable(modelStats);
         pnl.add(new JScrollPane(tabStats), BorderLayout.CENTER);
 
-        for (StatistiquesDAO.StatistiqueArticle stat : statsDAO.getStatistiquesArticles()) {
+        for (StatistiqueArticle stat : statsDAO.getStatistiquesArticles()) {
             modelStats.addRow(new Object[]{
                     stat.getNom(),
                     stat.getQuantiteTotale(),

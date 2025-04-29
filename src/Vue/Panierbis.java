@@ -11,11 +11,32 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
 
+/**
+ * Fenêtre d'affichage et de gestion du panier d'achat.
+ * <p>
+ * Cette interface permet à l'utilisateur de :
+ * - Visualiser les articles dans son panier
+ * - Supprimer des articles ou vider complètement le panier
+ * - Passer à l'étape de paiement
+ * - Calculer automatiquement les remises (1 article offerts tous les 10)
+ * </p>
+ *
+ * @author groupe 23 TD8
+ */
+
 public class Panierbis extends JFrame {
     private JTable table;
     private JLabel totalLabel;
     private PanierDAO panierDAO;
     private int commandeId;
+
+    /**
+     * Constructeur de la fenêtre du panier.
+     * <p>
+     * Initialise la fenêtre et charge automatiquement le panier
+     * de l'utilisateur connecté.
+     * </p>
+     */
 
     public Panierbis() {
         setTitle("Votre Panier");
@@ -32,6 +53,16 @@ public class Panierbis extends JFrame {
         initUI();
         chargerPanier();
     }
+
+    /**
+     * Initialise l'interface utilisateur.
+     * <p>
+     * Crée les composants principaux :
+     * - Un tableau des articles
+     * - Des boutons d'actions (supprimer, vider)
+     * - Un affichage du total
+     * </p>
+     */
 
     private void initUI() {
         setLayout(new BorderLayout());
@@ -113,7 +144,15 @@ public class Panierbis extends JFrame {
         add(bottomPanel, BorderLayout.SOUTH);
     }
 
-    /** Charge les lignes de la commande en cours uniquement. */
+    /**
+     * Charge les articles du panier dans le tableau.
+     * <p>
+     * Calcule automatiquement :
+     * - Les remises (1 article offert tous les 10)
+     * - Le sous-total par article
+     * - Le total général
+     * </p>
+     */
     private void chargerPanier() {
         DefaultTableModel model = (DefaultTableModel) table.getModel();
         model.setRowCount(0);
