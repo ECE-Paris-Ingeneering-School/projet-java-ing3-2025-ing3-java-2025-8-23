@@ -7,13 +7,26 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * DAO (Data Access Object) pour la gestion des commandes.
+ * <p>
+ * Permet la création, la récupération, la finalisation et l'affichage du détail des commandes
+ * </p>
+ *
+ * @author groupe 23 TD8
+ */
 public class CommandeDAO {
 
-    /** Récupère (ou crée) la commande en cours (valider = 0). */
+    /**
+     * Récupère une commande non validée pour un utilisateur donné,
+     * ou en crée une nouvelle si aucune existe
+     *
+     * @param utilisateurId l'identifiant de l'utilisateur
+     * @return l'identifiant de la commande en cours
+     * @throws RuntimeException si aucune commande ne peut être récupérée ou créée
+     */
     public int getOuCreateCommandeEnCours(int utilisateurId) {
-        // 1) Cherche une commande non validée
-        String selectSql =
-                "SELECT id FROM commandes WHERE utilisateur_id = ? AND valider = 0";
+        String selectSql = "SELECT id FROM commandes WHERE utilisateur_id = ? AND valider = 0";
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement ps = conn.prepareStatement(selectSql)) {
             ps.setInt(1, utilisateurId);
@@ -26,13 +39,9 @@ public class CommandeDAO {
             e.printStackTrace();
         }
 
-        // 2) Sinon, création d’une nouvelle commande (valider = 0 par défaut)
-        String insertSql =
-                "INSERT INTO commandes (utilisateur_id, date_commande, total) " +
-                        "VALUES (?, NOW(), 0)";
+        String insertSql = "INSERT INTO commandes (utilisateur_id, date_commande, total) VALUES (?, NOW(), 0)";
         try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement ps = conn.prepareStatement(
-                     insertSql, Statement.RETURN_GENERATED_KEYS)) {
+             PreparedStatement ps = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, utilisateurId);
             ps.executeUpdate();
             try (ResultSet keys = ps.getGeneratedKeys()) {
@@ -47,10 +56,15 @@ public class CommandeDAO {
         throw new RuntimeException("Impossible de récupérer/créer la commande en cours");
     }
 
-    /** Finalise une commande : met à jour total et passe valider=1. */
+    /**
+     * Finalise une commande en mettant à jour son total et en la marquant comme validée
+     *
+     * @param commandeId l'identifiant de la commande à finaliser
+     * @param total le montant total de la commande
+     * @return {@code true} si la mise à jour a fonctionnée et {@code false} sinon
+     */
     public boolean finaliserCommande(int commandeId, double total) {
-        String sql =
-                "UPDATE commandes SET total = ?, valider = 1 WHERE id = ?";
+        String sql = "UPDATE commandes SET total = ?, valider = 1 WHERE id = ?";
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setDouble(1, total);
@@ -62,12 +76,14 @@ public class CommandeDAO {
         }
     }
 
-    /** Récupère toutes les commandes (pour l’admin), y compris le flag valider. */
+    /**
+     * Récupère toutes les commandes enregistrées (pratique pour la vue de l'admin)
+     *
+     * @return une liste de {@link Commande} représentant toutes les commandes passées
+     */
     public List<Commande> getAllCommandes() {
         List<Commande> liste = new ArrayList<>();
-        String sql =
-                "SELECT id, utilisateur_id, date_commande, total, valider " +
-                        "FROM commandes";
+        String sql = "SELECT id, utilisateur_id, date_commande, total, valider FROM commandes";
         try (Connection conn = ConnectionFactory.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
@@ -86,13 +102,17 @@ public class CommandeDAO {
         return liste;
     }
 
-    /** Détail d’une commande : ses lignes de panier. */
+    /**
+     * Récupère les détails d'une commande spécifique : liste des articles achetés
+     *
+     * @param commandeId l'identifiant de la commande
+     * @return une liste de {@link Modele.Panier} en lien avec les articles de la commande
+     */
     public List<Modele.Panier> getDetailsCommande(int commandeId) {
         List<Modele.Panier> liste = new ArrayList<>();
-        String sql =
-                "SELECT p.id, p.article_id, p.quantite, a.nom, a.prix " +
-                        "FROM panier p JOIN articles a ON p.article_id = a.id " +
-                        "WHERE p.commande_id = ?";
+        String sql = "SELECT p.id, p.article_id, p.quantite, a.nom, a.prix " +
+                "FROM panier p JOIN articles a ON p.article_id = a.id " +
+                "WHERE p.commande_id = ?";
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, commandeId);
@@ -113,12 +133,15 @@ public class CommandeDAO {
         return liste;
     }
 
+    /**
+     * Récupère toutes les commandes d'un utilisateur spécifique
+     *
+     * @param userId l'identifiant de l'utilisateur
+     * @return une liste de {@link Commande} appartenant à l'utilisateur
+     */
     public List<Commande> getCommandesByUtilisateur(int userId) {
         List<Commande> liste = new ArrayList<>();
-        String sql =
-                "SELECT id, utilisateur_id, date_commande, total, valider " +
-                        "FROM commandes " +
-                        "WHERE utilisateur_id = ?";
+        String sql = "SELECT id, utilisateur_id, date_commande, total, valider FROM commandes WHERE utilisateur_id = ?";
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, userId);

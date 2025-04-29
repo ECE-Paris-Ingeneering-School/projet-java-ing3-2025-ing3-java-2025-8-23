@@ -7,10 +7,21 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * DAO (Data Access Object) pour la gestion des articles
+ * <p>
+ * Permet d'effectuer des opérations (création, lecture, modification, suppression) sur les articles
+ * stockés en BDD
+ * </p>
+ *
+ * @author groupe 23 TD8
+ */
 public class ArticlesDAO {
 
     /**
-     * Récupère tous les articles de la table `articles`.
+     * Récupère tous les articles de la table {@code articles}
+     *
+     * @return une liste d'objets {@link Article} représentant tous les articles dispos
      */
     public static List<Article> getAllArticles() {
         List<Article> liste = new ArrayList<>();
@@ -37,7 +48,10 @@ public class ArticlesDAO {
     }
 
     /**
-     * Crée un nouvel article.
+     * Ajoute un nouvel article dans la BDD
+     *
+     * @param art l'article à insérer
+     * @return {@code true} si l'insertion a marchée et {@code false} sinon
      */
     public boolean createArticle(Article art) {
         String sql = "INSERT INTO articles (nom, marque, description, prix, stock, image) "
@@ -58,7 +72,10 @@ public class ArticlesDAO {
     }
 
     /**
-     * Met à jour un article existant.
+     * Met à jour les informations d'un article existant
+     *
+     * @param art l'article contenant les nouvelles informations
+     * @return {@code true} si la mise à jour a fonctionnée et {@code false} sinon
      */
     public boolean updateArticle(Article art) {
         String sql = "UPDATE articles SET nom = ?, marque = ?, description = ?, "
@@ -80,9 +97,12 @@ public class ArticlesDAO {
     }
 
     /**
-     * Supprime un article par son ID.
+     * Supprime un article de la BDD en fonction de son identifiant
+     *
+     * @param id l'identifiant de l'article à supprimer
+     * @return {@code true} si la suppression a réussi et {@code false} sinon
      */
-    public boolean deleteArticle(int id) {
+    public boolean supprimerArticle(int id) {
         String sql = "DELETE FROM articles WHERE id = ?";
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {

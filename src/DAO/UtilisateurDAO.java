@@ -4,26 +4,29 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Date;
 import Utilitaires.ConnectionFactory;
 import Modele.Utilisateur;
 
 /**
- * DAO pour la table utilisateurs.
+ * DAO (Data Access Object) pour la table des utilisateurs
+ * <p>
+ * Permet la gestion des connexions, inscriptions et mises à jour de profils/rangs
+ * </p>
+ *
+ * @author groupe 23 TD8
  */
 public class UtilisateurDAO {
 
     /**
-     * Vérifie la connexion et renvoie l'utilisateur complet si OK.
+     * Vérifie la connexion et retourne l'utilisateur complet si les identifiants sont bons
      *
-     * @param email       l'adresse email
-     * @param motDePasse  le mot de passe
-     * @return l'objet Utilisateur complet (id, prénom, nom, email, mot_de_passe, adresse, date_inscription, rang) ou null
+     * @param email l'adresse mail de l'utilisateur
+     * @param motDePasse le mot de passe de l'utilisateur
+     * @return l'objet {@link Utilisateur} ou {@code null} si la connexion ne marche pas
      */
     public Utilisateur seConnecter(String email, String motDePasse) {
-        String sql =
-                "SELECT id, prenom, nom, email, mot_de_passe, adresse, date_inscription, rang " +
-                        "FROM utilisateurs WHERE email = ? AND mot_de_passe = ?";
+        String sql = "SELECT id, prenom, nom, email, mot_de_passe, adresse, date_inscription, rang " +
+                "FROM utilisateurs WHERE email = ? AND mot_de_passe = ?";
         try (Connection connexion = ConnectionFactory.getConnection();
              PreparedStatement ps = connexion.prepareStatement(sql)) {
 
@@ -51,15 +54,16 @@ public class UtilisateurDAO {
     }
 
     /**
-     * Inscrit un nouvel utilisateur dans la base.
+     * Inscrit un nouvel utilisateur dans la BDD
      *
-     * @param utilisateur l'objet Utilisateur à insérer (prenom, nom, email, mot_de_passe, adresse)
-     * @return true si l'insertion a réussi, false sinon
+     * @param utilisateur l'objet {@link Utilisateur} à insérer
+     * @return {@code true} si l'insertion a réussi et {@code false} sinon
      */
     public boolean inscrireUtilisateur(Utilisateur utilisateur) {
-        String sql =
-                "INSERT INTO utilisateurs (prenom, nom, email, mot_de_passe, adresse, rang) " +
-                        "VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO utilisateurs (prenom, nom, email, mot_de_passe, adresse, rang) " +
+                "VALUES (?, ?, ?, ?, ?, ?)";
+        final int RANG_CLIENT = 1; // Rang par défaut pour un nouvel utilisateur
+
         try (Connection connexion = ConnectionFactory.getConnection();
              PreparedStatement ps = connexion.prepareStatement(sql)) {
 
@@ -68,8 +72,7 @@ public class UtilisateurDAO {
             ps.setString(3, utilisateur.getEmail());
             ps.setString(4, utilisateur.getMotDePasse());
             ps.setString(5, utilisateur.getAdresse());
-            ps.setString(6,"1");
-
+            ps.setInt(6, RANG_CLIENT);
 
             return ps.executeUpdate() > 0;
         } catch (SQLException ex) {
@@ -79,11 +82,11 @@ public class UtilisateurDAO {
     }
 
     /**
-     * Met à jour le rang d'un utilisateur en base.
+     * Met à jour le rang d'un utilisateur existant
      *
-     * @param id           l'identifiant de l'utilisateur
-     * @param nouveauRang  le nouveau rang (1→2)
-     * @return true si la mise à jour a affecté au moins une ligne
+     * @param id l'identifiant de l'utilisateur
+     * @param nouveauRang la nouvelle valeur du rang
+     * @return {@code true} si la mise à jour a affecté au moins une ligne
      */
     public boolean mettreAJourRang(int id, int nouveauRang) {
         String sql = "UPDATE utilisateurs SET rang = ? WHERE id = ?";
@@ -99,17 +102,25 @@ public class UtilisateurDAO {
         }
     }
 
+    /**
+     * Met à jour les infos de profil d'un utilisateur
+     *
+     * @param userUpdated l'objet {@link Utilisateur} avec les nouvelles infos
+     * @return {@code true} si la mise à jour a réussi et {@code false} sinon
+     */
     public boolean mettreAJourProfil(Utilisateur userUpdated) {
-        String sql = "UPDATE utilisateurs SET prenom = ?, nom = ?, email = ?, mot_de_passe = ?, adresse = ? "
-                + "WHERE id = ?";
+        String sql = "UPDATE utilisateurs SET prenom = ?, nom = ?, email = ?, mot_de_passe = ?, adresse = ? " +
+                "WHERE id = ?";
         try (Connection connexion = ConnectionFactory.getConnection();
              PreparedStatement ps = connexion.prepareStatement(sql)) {
+
             ps.setString(1, userUpdated.getPrenom());
             ps.setString(2, userUpdated.getNom());
             ps.setString(3, userUpdated.getEmail());
             ps.setString(4, userUpdated.getMotDePasse());
             ps.setString(5, userUpdated.getAdresse());
             ps.setInt(6, userUpdated.getId());
+
             return ps.executeUpdate() > 0;
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -117,4 +128,3 @@ public class UtilisateurDAO {
         }
     }
 }
-

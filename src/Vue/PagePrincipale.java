@@ -15,12 +15,23 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Cette classe représente la page principale du site.
+ * On peut y voir tous les articles disponibles, chercher un produit, filtrer par marque
+ * ou par catégorie, et aussi ajouter des articles dans son panier.
+ *
+ * @author groupe 23 TD8
+ */
 public class PagePrincipale extends JFrame {
+
     private JTextField barreRecherche;
     private JComboBox<String> comboMarques;
     private JPanel panelContenu;
     private List<Article> tousLesArticles;
 
+    /**
+     * Constructeur : Initialise toute la fenêtre principale.
+     */
     public PagePrincipale() {
         Utilisateur user = Session.getUtilisateur();
 
@@ -30,7 +41,6 @@ public class PagePrincipale extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        // --- En-tête ---
         JPanel panelEntete = new JPanel(new BorderLayout());
         panelEntete.setBackground(new Color(255, 153, 0));
 
@@ -42,15 +52,14 @@ public class PagePrincipale extends JFrame {
         labelLogo.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                dispose(); // ferme la page actuelle
-                new PageAccueil().setVisible(true); // retourne à l’accueil
+                dispose();
+                new PageAccueil().setVisible(true);
             }
         });
         panelEntete.add(labelLogo, BorderLayout.WEST);
-
         JPanel centerSearchPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
         barreRecherche = new JTextField(20);
-        comboMarques     = new JComboBox<>();
+        comboMarques = new JComboBox<>();
         barreRecherche.setPreferredSize(new Dimension(150, 30));
         comboMarques.setPreferredSize(new Dimension(100, 30));
         centerSearchPanel.setOpaque(false);
@@ -60,6 +69,7 @@ public class PagePrincipale extends JFrame {
         centerSearchPanel.add(comboMarques);
         panelEntete.add(centerSearchPanel, BorderLayout.CENTER);
 
+        // Droite : boutons "Mon panier" et "Profil"
         JPanel rightButtonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         rightButtonPanel.setOpaque(false);
         JButton btnPanier = new JButton("Mon Panier");
@@ -70,7 +80,6 @@ public class PagePrincipale extends JFrame {
         rightButtonPanel.add(btnProfil);
         panelEntete.add(rightButtonPanel, BorderLayout.EAST);
 
-        // **Ouvre Panierbis** (et non plus Panier)
         btnPanier.addActionListener(e -> {
             dispose();
             SwingUtilities.invokeLater(() -> new Panierbis().setVisible(true));
@@ -79,7 +88,6 @@ public class PagePrincipale extends JFrame {
 
         add(panelEntete, BorderLayout.NORTH);
 
-        // --- Navigation à gauche ---
         JPanel panelNavigation = new JPanel();
         panelNavigation.setLayout(new BoxLayout(panelNavigation, BoxLayout.Y_AXIS));
         panelNavigation.setPreferredSize(new Dimension(150, 600));
@@ -95,7 +103,6 @@ public class PagePrincipale extends JFrame {
         }
         add(panelNavigation, BorderLayout.WEST);
 
-        // --- Contenu central ---
         panelContenu = new JPanel(new GridLayout(0, 4, 20, 20));
         panelContenu.setBackground(Color.WHITE);
         JScrollPane scrollPane = new JScrollPane(panelContenu);
@@ -103,13 +110,12 @@ public class PagePrincipale extends JFrame {
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
         add(scrollPane, BorderLayout.CENTER);
 
-        // --- Pied de page ---
         JPanel panelPied = new JPanel();
         panelPied.setBackground(new Color(200, 200, 200));
         panelPied.add(new JLabel("© 2025 Ma Boutique. Tous droits réservés."));
         add(panelPied, BorderLayout.SOUTH);
 
-        // --- Chargement des articles et affichage initial ---
+        // Chargement des articles depuis la BDD et affichage
         tousLesArticles = ArticlesDAO.getAllArticles();
         chargerMarques();
         afficherProduits(tousLesArticles);
@@ -118,6 +124,9 @@ public class PagePrincipale extends JFrame {
         comboMarques.addActionListener(e -> filtrerProduits());
     }
 
+    /**
+     * Filtrer les produits selon le texte tapé dans la barre de recherche et la marque choisie.
+     */
     private void filtrerProduits() {
         String txt = barreRecherche.getText().trim().toLowerCase();
         String marque = comboMarques.getSelectedItem().toString();
@@ -128,6 +137,10 @@ public class PagePrincipale extends JFrame {
         afficherProduits(filtres);
     }
 
+    /**
+     * Filtrer les produits quand on clique sur une catégorie dans le menu de gauche.
+     * @param cat La catégorie choisie
+     */
     private void filtrerParCategorie(String cat) {
         List<Article> filtres = tousLesArticles.stream()
                 .filter(a -> a.getNom().toLowerCase().contains(cat.toLowerCase()))
@@ -135,6 +148,9 @@ public class PagePrincipale extends JFrame {
         afficherProduits(filtres);
     }
 
+    /**
+     * Charge toutes les marques disponibles à partir des articles.
+     */
     private void chargerMarques() {
         Set<String> marques = tousLesArticles.stream()
                 .map(Article::getMarque)
@@ -144,13 +160,17 @@ public class PagePrincipale extends JFrame {
         marques.stream().sorted().forEach(comboMarques::addItem);
     }
 
+    /**
+     * Affiche les produits dans la grille du panel principal.
+     * @param produits La liste d'articles à afficher
+     */
     private void afficherProduits(List<Article> produits) {
         panelContenu.removeAll();
 
         Utilisateur user = Session.getUtilisateur();
         CommandeDAO commandeDAO = new CommandeDAO();
         int commandeId = commandeDAO.getOuCreateCommandeEnCours(user.getId());
-        PanierDAO panierDAO     = new PanierDAO();
+        PanierDAO panierDAO = new PanierDAO();
 
         for (Article article : produits) {
             JPanel panelArticle = new JPanel(new BorderLayout());
@@ -198,7 +218,7 @@ public class PagePrincipale extends JFrame {
 
             panelArticle.add(imageLabel, BorderLayout.CENTER);
 
-            JLabel lblNom  = new JLabel(article.getNom(), SwingConstants.CENTER);
+            JLabel lblNom = new JLabel(article.getNom(), SwingConstants.CENTER);
             JLabel lblPrix = new JLabel(article.getPrix() + " €", SwingConstants.CENTER);
             lblPrix.setFont(new Font("SansSerif", Font.BOLD, 13));
 

@@ -13,22 +13,32 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
+/**
+ * Interface d'administration pour la gestion de notre site.
+ * Permet de gérer l'inventaire des produits et de visualiser les commandes clients.
+ *
+ * @author groupe 23 TD8
+ */
 public class PageAdmin extends JFrame {
     private JTabbedPane onglets;
 
-    // --- INVENTAIRE ---
     private JTable tabArticles;
     private DefaultTableModel modelArticles;
     private ArticlesDAO articlesDAO = new ArticlesDAO();
 
-    // --- CLIENTS / COMMANDES ---
     private JTable tabCommandes, tabDetails;
     private DefaultTableModel modelCommandes, modelDetails;
     private CommandeDAO commandeDAO = new CommandeDAO();
-    private PanierDAO panierDAO     = new PanierDAO();
+    private PanierDAO panierDAO = new PanierDAO();
 
+    /**
+     * Constructeur de la page d'administration.
+     * Initialise l'interface avec les onglets de gestion.
+     */
     public PageAdmin() {
         Utilisateur admin = Session.getUtilisateur();
         setTitle("Admin Dashboard - " + admin.getPrenom() + " " + admin.getNom());
@@ -40,11 +50,10 @@ public class PageAdmin extends JFrame {
         initInventaireTab();
         initClientsTab();
         onglets.addTab("Inventaire", null, buildInventairePanel());
-        onglets.addTab("Clients",    null, buildClientsPanel());
+        onglets.addTab("Clients", null, buildClientsPanel());
 
         add(onglets, BorderLayout.CENTER);
 
-        // Déconnexion
         JButton btnDeco = new JButton("Déconnexion");
         btnDeco.addActionListener(e -> {
             Session.clear();
@@ -58,16 +67,26 @@ public class PageAdmin extends JFrame {
         setVisible(true);
     }
 
-    // ===== INVENTAIRE =====
+    /**
+     * Initialise le tableau des articles.
+     */
     private void initInventaireTab() {
         String[] cols = {"ID","Nom","Marque","Description","Prix","Stock"};
         modelArticles = new DefaultTableModel(cols, 0) {
-            @Override public boolean isCellEditable(int r, int c) { return false; }
+            @Override
+            public boolean isCellEditable(int r, int c) {
+                return false;
+            }
         };
         tabArticles = new JTable(modelArticles);
         reloadArticles();
     }
 
+    /**
+     * Construit le panel de gestion des articles.
+     *
+     * @return JPanel configuré avec les composants nécessaires
+     */
     private JPanel buildInventairePanel() {
         JPanel pnl = new JPanel(new BorderLayout(10,10));
         pnl.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
@@ -75,7 +94,7 @@ public class PageAdmin extends JFrame {
 
         JPanel btns = new JPanel();
         JButton btnAdd = new JButton("Ajouter");
-        JButton btnEdit= new JButton("Modifier");
+        JButton btnEdit = new JButton("Modifier");
         JButton btnDel = new JButton("Supprimer");
         btns.add(btnAdd);
         btns.add(btnEdit);
@@ -86,8 +105,8 @@ public class PageAdmin extends JFrame {
         btnEdit.addActionListener(e -> {
             int sel = tabArticles.getSelectedRow();
             if (sel < 0) return;
-            Article art = articlesDAO
-                    .getAllArticles().get(tabArticles.convertRowIndexToModel(sel));
+            Article art = articlesDAO.getAllArticles()
+                    .get(tabArticles.convertRowIndexToModel(sel));
             openArticleDialog(art);
         });
         btnDel.addActionListener(e -> {
@@ -95,9 +114,9 @@ public class PageAdmin extends JFrame {
             if (sel < 0) return;
             int id = (int) modelArticles.getValueAt(sel, 0);
             if (JOptionPane.showConfirmDialog(this,
-                    "Supprimer cet article ?","Confirmez",
+                    "Supprimer cet article ?", "Confirmez",
                     JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-                articlesDAO.deleteArticle(id);
+                articlesDAO.supprimerArticle(id);
                 reloadArticles();
             }
         });
@@ -105,43 +124,89 @@ public class PageAdmin extends JFrame {
         return pnl;
     }
 
+    /**
+     * Recharge la liste des articles depuis la BDD.
+     */
     private void reloadArticles() {
         modelArticles.setRowCount(0);
         for (Article a : articlesDAO.getAllArticles()) {
             modelArticles.addRow(new Object[]{
-                    a.getId(), a.getNom(), a.getMarque(),
-                    a.getDescription(), String.format("%.2f", a.getPrix()),
+                    a.getId(),
+                    a.getNom(),
+                    a.getMarque(),
+                    a.getDescription(),
+                    String.format("%.2f", a.getPrix()),
                     a.getStock()
             });
         }
     }
 
+    /**
+     * Ouvre une boîte de dialogue pour ajouter ou modifier un article.
+     *
+     * @param art L'article à modifier (ou {@code null} pour une création)
+     */
     private void openArticleDialog(Article art) {
         boolean isNew = (art == null);
         JDialog dlg = new JDialog(this,
                 isNew ? "Ajouter un article" : "Modifier l'article", true);
-        dlg.setSize(400,350);
+        dlg.setSize(400, 400);
         dlg.setLocationRelativeTo(this);
 
         JPanel p = new JPanel(new GridLayout(0,2,5,5));
         p.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
-        JTextField fNom   = new JTextField(isNew ? "" : art.getNom());
-        JTextField fMar   = new JTextField(isNew ? "" : art.getMarque());
-        JTextField fDesc  = new JTextField(isNew ? "" : art.getDescription());
-        JTextField fPrix  = new JTextField(isNew ? "" : String.valueOf(art.getPrix()));
+
+        JTextField fNom = new JTextField(isNew ? "" : art.getNom());
+        JTextField fMar = new JTextField(isNew ? "" : art.getMarque());
+        JTextField fDesc = new JTextField(isNew ? "" : art.getDescription());
+        JTextField fPrix = new JTextField(isNew ? "" : String.valueOf(art.getPrix()));
         JTextField fStock = new JTextField(isNew ? "" : String.valueOf(art.getStock()));
+
         p.add(new JLabel("Nom :"));        p.add(fNom);
         p.add(new JLabel("Marque :"));     p.add(fMar);
         p.add(new JLabel("Description:")); p.add(fDesc);
         p.add(new JLabel("Prix :"));       p.add(fPrix);
         p.add(new JLabel("Stock :"));      p.add(fStock);
 
-        JButton ok     = new JButton("OK");
+        // Gestion de l'image
+        JLabel lblImage = new JLabel(isNew ? "Aucune image sélectionnée" : "Image existante");
+        JButton btnChoisirImage = new JButton("Choisir une image");
+        final byte[][] imageBytes = new byte[1][];
+
+        btnChoisirImage.addActionListener(event -> {
+            JFileChooser fileChooser = new JFileChooser();
+            int result = fileChooser.showOpenDialog(dlg);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                try {
+                    java.io.File file = fileChooser.getSelectedFile();
+                    lblImage.setText(file.getName());
+                    Path path = file.toPath();
+                    imageBytes[0] = Files.readAllBytes(path);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(dlg, "Erreur lors du chargement de l'image.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        p.add(new JLabel("Image :"));
+        JPanel imgPanel = new JPanel(new BorderLayout());
+        imgPanel.add(btnChoisirImage, BorderLayout.WEST);
+        imgPanel.add(lblImage, BorderLayout.CENTER);
+        p.add(imgPanel);
+
+        JButton ok = new JButton("OK");
         JButton cancel = new JButton("Annuler");
-        JPanel bp = new JPanel(); bp.add(ok); bp.add(cancel);
+        JPanel bp = new JPanel();
+        bp.add(ok);
+        bp.add(cancel);
 
         ok.addActionListener(e -> {
             try {
+                byte[] image = imageBytes[0];
+                if (!isNew && image == null) {
+                    image = art.getImage(); // conserver l'image actuelle si aucune nouvelle sélectionnée
+                }
                 Article x = new Article(
                         isNew ? 0 : art.getId(),
                         fNom.getText().trim(),
@@ -149,10 +214,10 @@ public class PageAdmin extends JFrame {
                         fDesc.getText().trim(),
                         Double.parseDouble(fPrix.getText().trim()),
                         Integer.parseInt(fStock.getText().trim()),
-                        null
+                        image
                 );
                 if (isNew) articlesDAO.createArticle(x);
-                else        articlesDAO.updateArticle(x);
+                else articlesDAO.updateArticle(x);
                 dlg.dispose();
                 reloadArticles();
             } catch (Exception ex) {
@@ -169,17 +234,25 @@ public class PageAdmin extends JFrame {
         dlg.setVisible(true);
     }
 
-    // ===== CLIENTS / COMMANDES =====
+    /**
+     * Initialise les tableaux des commandes et détails.
+     */
     private void initClientsTab() {
         modelCommandes = new DefaultTableModel(
                 new String[]{"ID","User ID","Date","Total (€)","Statut"}, 0) {
-            @Override public boolean isCellEditable(int r, int c) { return false; }
+            @Override
+            public boolean isCellEditable(int r, int c) {
+                return false;
+            }
         };
         tabCommandes = new JTable(modelCommandes);
 
         modelDetails = new DefaultTableModel(
                 new String[]{"Article","Prix","Quantité","Sous-total"}, 0) {
-            @Override public boolean isCellEditable(int r, int c) { return false; }
+            @Override
+            public boolean isCellEditable(int r, int c) {
+                return false;
+            }
         };
         tabDetails = new JTable(modelDetails);
 
@@ -194,6 +267,11 @@ public class PageAdmin extends JFrame {
         });
     }
 
+    /**
+     * Construit le panel de gestion des commandes.
+     *
+     * @return JPanel configuré avec les composants nécessaires
+     */
     private JPanel buildClientsPanel() {
         JPanel pnl = new JPanel(new BorderLayout(10,10));
         pnl.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
@@ -211,6 +289,9 @@ public class PageAdmin extends JFrame {
         return pnl;
     }
 
+    /**
+     * Recharge la liste des commandes depuis la BDD.
+     */
     private void reloadCommandes() {
         modelCommandes.setRowCount(0);
         List<Commande> l = commandeDAO.getAllCommandes();
@@ -226,6 +307,10 @@ public class PageAdmin extends JFrame {
         }
     }
 
+    /**
+     * Recharge les détails d'une commande spécifique.
+     * @param commandeId L'identifiant de la commande à afficher
+     */
     private void reloadDetails(int commandeId) {
         modelDetails.setRowCount(0);
         List<Panier> l = commandeDAO.getDetailsCommande(commandeId);

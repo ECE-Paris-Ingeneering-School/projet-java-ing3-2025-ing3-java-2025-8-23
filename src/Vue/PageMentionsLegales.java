@@ -1,66 +1,64 @@
 package Vue; // Le package dans lequel se trouve cette classe
 
-import javax.swing.*; // Import des composants Swing
-import java.awt.*; // Import des classes pour la gestion graphique
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener; // Pour gérer les événements (boutons, clics, etc.)
+import javax.swing.*; // Import des composants Swing pour l'interface graphique
+import java.awt.*; // Import des classes pour la gestion graphique (layout, couleurs, etc.)
 
-// Classe représentant la fenêtre "Mentions légales", hérite de JFrame
+/**
+ * Cette classe représente la page "Mentions légales" de notre site.
+ * Elle permet d'afficher les informations légales du site dans une interface claire.
+ *
+ * @author groupe 23 TD8
+ */
 public class PageMentionsLegales extends JFrame {
 
-    // Déclaration de deux couleurs personnalisées utilisées dans l'interface
-    private final Color PRIMARY_COLOR = new Color(30, 30, 45); // Couleur principale (bleu foncé)
-    private final Color SECONDARY_COLOR = new Color(220, 53, 69); // Couleur secondaire (rouge)
+    // Déclaration des couleurs utilisées pour harmoniser l'interface
+    private final Color PRIMARY_COLOR = new Color(30, 30, 45); // Bleu foncé pour les titres
+    private final Color SECONDARY_COLOR = new Color(220, 53, 69); // Rouge pour les éléments secondaires (pas utilisé ici mais prêt)
 
-    // Constructeur de la page
+    /**
+     * Constructeur de la page de mentions légales.
+     * Configure l'ensemble des éléments graphiques de la fenetre.
+     */
     public PageMentionsLegales() {
-        // Définition des propriétés de la fenêtre
         setTitle("Java Shopping - Mentions Légales");
-        setSize(1000, 700); // Dimensions de la fenêtre
-        setLocationRelativeTo(null); // Centre la fenêtre à l'écran
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE); // Ferme seulement cette fenêtre, pas tout le programme
+        setSize(1000, 700);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-        // Création du panel principal avec une disposition en BorderLayout
         JPanel mainPanel = new JPanel(new BorderLayout());
-        mainPanel.setBackground(Color.WHITE); // Fond blanc
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40)); // Marges internes
+        mainPanel.setBackground(Color.WHITE);
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
 
-        // --- HEADER (haut de page) ---
         JPanel header = new JPanel(new BorderLayout());
-        header.setBackground(Color.WHITE); // Fond blanc
-        header.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(230, 230, 230))); // Ligne grise en bas
+        header.setBackground(Color.WHITE);
+        header.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(230, 230, 230)));
 
-        // Titre centré
         JLabel title = new JLabel("MENTIONS LÉGALES", SwingConstants.CENTER);
-        title.setFont(new Font("Montserrat", Font.BOLD, 32)); // Police stylisée
-        title.setForeground(PRIMARY_COLOR); // Couleur bleue foncée
-        title.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0)); // Marges autour du titre
-        header.add(title, BorderLayout.CENTER); // Ajout au centre du header
+        title.setFont(new Font("Montserrat", Font.BOLD, 32));
+        title.setForeground(PRIMARY_COLOR);
+        title.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
+        header.add(title, BorderLayout.CENTER);
 
-        // --- BOUTON RETOUR ---
-        JButton backButton = new JButton("Retour"); // Création du bouton
+        JButton backButton = new JButton("Retour");
         backButton.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        backButton.setForeground(PRIMARY_COLOR); // Couleur du texte
-        backButton.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 15)); // Padding
-        backButton.setContentAreaFilled(false); // Fond transparent
-        backButton.setCursor(new Cursor(Cursor.HAND_CURSOR)); // Curseur main au survol
+        backButton.setForeground(PRIMARY_COLOR);
+        backButton.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 15));
+        backButton.setContentAreaFilled(false); // Pas de fond coloré pour le bouton
+        backButton.setCursor(new Cursor(Cursor.HAND_CURSOR)); // Change le curseur au survol
 
-        // Action effectuée au clic sur le bouton "Retour"
         backButton.addActionListener(e -> {
-            new PageAccueil().setVisible(true); // Ouvre la page d’accueil
-            dispose(); // Ferme cette page
+            new PageAccueil().setVisible(true);
+            dispose();
         });
-        header.add(backButton, BorderLayout.WEST); // Ajoute le bouton à gauche du header
+        header.add(backButton, BorderLayout.WEST);
 
-        // Ajout du header en haut du panel principal
         mainPanel.add(header, BorderLayout.NORTH);
 
-        // --- CONTENU PRINCIPAL DES MENTIONS LÉGALES ---
-        JTextArea content = new JTextArea(); // Zone de texte
-        content.setEditable(false); // Non modifiable
-        content.setLineWrap(true); // Retour automatique à la ligne
-        content.setWrapStyleWord(true); // Coupe les lignes aux mots
-        content.setFont(new Font("SansSerif", Font.PLAIN, 14)); // Police simple
+        JTextArea content = new JTextArea();
+        content.setEditable(false);
+        content.setLineWrap(true);
+        content.setWrapStyleWord(true);
+        content.setFont(new Font("SansSerif", Font.PLAIN, 14));
 
         // Texte des mentions légales
         content.setText(
@@ -96,17 +94,17 @@ public class PageMentionsLegales extends JFrame {
                         "l'utilisation des cookies conformément à notre Politique de Cookies."
         );
 
-        // Ajout du contenu dans un scrollPane pour permettre le défilement si nécessaire
         JScrollPane scrollPane = new JScrollPane(content);
-        scrollPane.setBorder(null); // Supprime les bordures par défaut
-        mainPanel.add(scrollPane, BorderLayout.CENTER); // Place le contenu au centre
+        scrollPane.setBorder(null);
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
 
-        // Définit le panel principal comme contenu de la fenêtre
         setContentPane(mainPanel);
     }
 
-    // Méthode main : permet de lancer cette page indépendamment pour test
+    /**
+     * Méthode main : permet de lancer uniquement cette page pour la tester.
+     */
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new PageMentionsLegales().setVisible(true)); // Lance la fenêtre
+        SwingUtilities.invokeLater(() -> new PageMentionsLegales().setVisible(true));
     }
 }

@@ -10,18 +10,22 @@ import Utilitaires.ConnectionFactory;
 import Modele.Panier;
 
 /**
- * DAO pour la table `panier`.
- * Gère l’ajout, la mise à jour, la suppression et la lecture
- * des lignes de panier associées à une commande donnée.
+ * DAO (Data Access Object) pour la gestion du panier
+ * <p>
+ * Permet d'ajouter, mettre à jour, lire et supprimer des articles
+ * associés à une commande en base de données.
+ * </p>
+ *
+ * @author groupe 23 TD8
  */
 public class PanierDAO {
 
     /**
-     * Ajoute ou met à jour la quantité d’un article dans le panier.
+     * Ajoute un produit au panier ou met à jour sa quantité si il est déja présent
      *
-     * @param commandeId L’ID de la commande “en cours”
-     * @param articleId  L’ID de l’article à ajouter
-     * @param quantite   La quantité à ajouter
+     * @param commandeId l'identifiant de la commande en cours
+     * @param articleId l'identifiant de l'article à ajouter ou mettre à jour
+     * @param quantite la quantité à ajouter
      */
     public void ajouterProduit(int commandeId, int articleId, int quantite) {
         String checkSql  = "SELECT quantite FROM panier WHERE commande_id = ? AND article_id = ?";
@@ -29,7 +33,6 @@ public class PanierDAO {
         String insertSql = "INSERT INTO panier (commande_id, article_id, quantite) VALUES (?, ?, ?)";
 
         try (Connection conn = ConnectionFactory.getConnection()) {
-            // 1) Vérifier si la ligne existe déjà
             try (PreparedStatement ps = conn.prepareStatement(checkSql)) {
                 ps.setInt(1, commandeId);
                 ps.setInt(2, articleId);
@@ -46,7 +49,6 @@ public class PanierDAO {
                     }
                 }
             }
-            // 2) Sinon, insertion d’une nouvelle ligne
             try (PreparedStatement psIns = conn.prepareStatement(insertSql)) {
                 psIns.setInt(1, commandeId);
                 psIns.setInt(2, articleId);
@@ -59,18 +61,17 @@ public class PanierDAO {
     }
 
     /**
-     * Récupère toutes les lignes du panier pour une commande donnée.
+     * Récupère tous les articles du panier pour une commande spécifique.
      *
-     * @param commandeId L’ID de la commande “en cours”
-     * @return Liste des objets Panier (id, article_id, quantite, nom, prix)
+     * @param commandeId l'identifiant de la commande
+     * @return une liste de {@link Panier} contenant les produits et leurs infos
      */
     public List<Panier> getPanier(int commandeId) {
         List<Panier> liste = new ArrayList<>();
-        String sql =
-                "SELECT p.id, p.article_id, p.quantite, a.nom, a.prix " +
-                        "FROM panier p " +
-                        "JOIN articles a ON p.article_id = a.id " +
-                        "WHERE p.commande_id = ?";
+        String sql = "SELECT p.id, p.article_id, p.quantite, a.nom, a.prix " +
+                "FROM panier p " +
+                "JOIN articles a ON p.article_id = a.id " +
+                "WHERE p.commande_id = ?";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -95,9 +96,9 @@ public class PanierDAO {
     }
 
     /**
-     * Supprime une ligne du panier par son ID.
+     * Supprime un article du panier en fonction de son identifiant.
      *
-     * @param id L’ID de la ligne panier à supprimer
+     * @param id l'identifiant de la ligne dans le panier
      */
     public void supprimerArticle(int id) {
         String sql = "DELETE FROM panier WHERE id = ?";
@@ -110,6 +111,11 @@ public class PanierDAO {
         }
     }
 
+    /**
+     * Vide la totalité du panier d'une commande donnée
+     *
+     * @param commandeId l'identifiant de la commande
+     */
     public void viderPanierCommande(int commandeId) {
         try (Connection conn = ConnectionFactory.getConnection()) {
             String sql = "DELETE FROM panier WHERE commande_id = ?";
@@ -121,5 +127,4 @@ public class PanierDAO {
             e.printStackTrace();
         }
     }
-
 }

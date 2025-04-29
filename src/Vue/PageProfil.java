@@ -13,9 +13,25 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
 
+/**
+ * Classe qui représente la page de profil d'un utilisateur connecté.
+ * Elle permet de voir et modifier ses infos, et consulter l'historique de ses commandes.
+ *
+ * @author groupe 23 TD8
+ */
+
 public class PageProfil extends JFrame {
+    /**
+     * DAO pour gérer les opérations sur les utilisateurs.
+     */
     private final UtilisateurDAO userDao     = new UtilisateurDAO();
+    /**
+     * DAO pour récupérer les commandes d'un utilisateur.
+     */
     private final CommandeDAO commandeDAO    = new CommandeDAO();
+    /**
+     * Utilisateur actuellement connecté.
+     */
     private Utilisateur user;
 
     // Composants Profil
@@ -24,6 +40,10 @@ public class PageProfil extends JFrame {
     private JTextField fldPrenom, fldNom, fldEmail, fldAdresse;
     private JPasswordField fldAncienMDP, fldNouveauMDP;
 
+    /**
+     * Constructeur de la page de profil.
+     * Initialise l'interface graphique et affiche les informations de l'utilisateur.
+     */
     public PageProfil() {
         user = Session.getUtilisateur();
         setTitle("Mon Profil - " + user.getPrenom() + " " + user.getNom());
@@ -39,6 +59,10 @@ public class PageProfil extends JFrame {
         setVisible(true);
     }
 
+    /**
+     * Construit le panneau affichant les infos du profil.
+     * @return JPanel construit pour l'onglet profil
+     */
     private JPanel buildProfilPanel() {
         JPanel main = new JPanel(new BorderLayout(10,10));
         main.setBorder(BorderFactory.createEmptyBorder(15,15,15,15));
@@ -54,6 +78,9 @@ public class PageProfil extends JFrame {
         return main;
     }
 
+    /**
+     * Affiche les informations du profil en mode lecture seule.
+     */
     private void showLectureMode() {
         formPanel.removeAll();
         buttonPanel.removeAll();
@@ -94,6 +121,9 @@ public class PageProfil extends JFrame {
         formPanel.repaint();
     }
 
+    /**
+     * Passe en mode édition pour permettre à l'utilisateur de modifier ses infos.
+     */
     private void showEditionMode() {
         formPanel.removeAll();
         buttonPanel.removeAll();
@@ -137,6 +167,10 @@ public class PageProfil extends JFrame {
         formPanel.repaint();
     }
 
+    /**
+     * Sauvegarde les changements faits par l'utilisateur sur son profil.
+     * Vérifie aussi la modif du mot de passe
+     */
     private void saveChanges() {
         String prenom  = fldPrenom.getText().trim();
         String nom     = fldNom.getText().trim();
@@ -189,18 +223,20 @@ public class PageProfil extends JFrame {
         }
     }
 
+    /**
+     * Construit le panneau affichant l'historique des commandes de l'utilisateur.
+     * @return JPanel construit pour l'onglet historique
+     */
     private JPanel buildHistoriquePanel() {
         JPanel pnl = new JPanel(new BorderLayout(10,10));
         pnl.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
 
-        // Table des commandes
         String[] colsCmd = {"ID","Date","Total (€)","Statut"};
         DefaultTableModel mCmd = new DefaultTableModel(colsCmd,0) {
             @Override public boolean isCellEditable(int r,int c){return false;}
         };
         JTable tblCmd = new JTable(mCmd);
 
-        // Chargement historique
         List<Commande> commandes = commandeDAO.getCommandesByUtilisateur(user.getId());
 
         for (Commande c : commandes) {
@@ -211,7 +247,6 @@ public class PageProfil extends JFrame {
             });
         }
 
-        // Table des détails
         String[] colsDet = {"Article","Prix U. (€)","Quantité","Sous-total (€)"};
         DefaultTableModel mDet = new DefaultTableModel(colsDet,0) {
             @Override public boolean isCellEditable(int r,int c){return false;}
@@ -251,6 +286,10 @@ public class PageProfil extends JFrame {
         return pnl;
     }
 
+    /**
+     * Crée une configuration par défaut pour le placement des composants dans un GridBagLayout.
+     * @return GridBagConstraints configuré
+     */
     private GridBagConstraints createGbc() {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets  = new Insets(8,8,8,8);
@@ -260,6 +299,13 @@ public class PageProfil extends JFrame {
         return gbc;
     }
 
+    /**
+     * Ajoute un label + une valeur au formulaire du profil.
+     * @param label Texte du label
+     * @param value Valeur à afficher
+     * @param gbc Contraintes
+     * @param row Ligne à laquelle ajouter l'élément
+     */
     private void addLabelValue(String label, String value,
                                GridBagConstraints gbc, int row) {
         gbc.gridy = row;
@@ -269,6 +315,14 @@ public class PageProfil extends JFrame {
         formPanel.add(new JLabel(value), gbc);
     }
 
+    /**
+     * Ajoute un label + un champ de texte au formulaire du profil.
+     * @param label Texte du label
+     * @param init Valeur du champ
+     * @param gbc Contraintes
+     * @param row Ligne à laquelle ajouter l'élément
+     * @return Le JTextField créé
+     */
     private JTextField addLabelField(String label, String init,
                                      GridBagConstraints gbc, int row) {
         gbc.gridy = row;

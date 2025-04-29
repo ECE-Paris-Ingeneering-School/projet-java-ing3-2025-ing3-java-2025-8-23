@@ -11,14 +11,30 @@ import java.awt.*;
 import java.text.NumberFormat;
 import java.util.List;
 
+/**
+ * Fenêtre de paiement pour une commande en cours.
+ * <p>
+ * Cette classe représente l'interface graphique permettant à l'utilisateur
+ * de finaliser le paiement de sa commande. Elle calcule automatiquement
+ * le montant total avec les remises applicables.
+ * </p>
+ *
+ * @author groupe 23 TD8
+ */
 public class Paiementbis extends JFrame {
 
     private int commandeId;
-    private PanierDAO panierDAO   = new PanierDAO();
+    private PanierDAO panierDAO = new PanierDAO();
     private CommandeDAO commandeDAO = new CommandeDAO();
 
+    /**
+     * Constructeur de la fenêtre de paiement.
+     * <p>
+     * Initialise la fenêtre avec les infos de la commande en cours
+     * pour l'utilisateur connecté.
+     * </p>
+     */
     public Paiementbis() {
-        // Récupère la commande non payée
         Utilisateur user = Session.getUtilisateur();
         this.commandeId = commandeDAO.getOuCreateCommandeEnCours(user.getId());
 
@@ -30,16 +46,22 @@ public class Paiementbis extends JFrame {
         initUI();
     }
 
+    /**
+     * Initialise l'interface utilisateur.
+     * <p>
+     * Crée les composants graphiques :
+     * - Un panel affichant le total à payer
+     * - Un bouton de confirmation de paiement
+     * </p>
+     */
     private void initUI() {
         setLayout(new BorderLayout(10, 10));
         JPanel main = new JPanel(new BorderLayout(10, 20));
         main.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         add(main, BorderLayout.CENTER);
 
-        // Calcul du total
         double total = calculerTotalAvecRemise();
 
-        // Affichage sommaire du total
         JPanel totalPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         totalPanel.add(new JLabel("Total à payer : "));
         JLabel lblTotal = new JLabel(NumberFormat.getCurrencyInstance().format(total));
@@ -47,17 +69,14 @@ public class Paiementbis extends JFrame {
         totalPanel.add(lblTotal);
         main.add(totalPanel, BorderLayout.NORTH);
 
-        // (Vous pouvez conserver ici le choix carte/PayPal…)
-
-        // Bouton de confirmation
+        // bouton de confirmation
         JButton confirmBtn = new JButton("Confirmer le paiement");
         confirmBtn.setBackground(new Color(56, 142, 60));
         confirmBtn.setForeground(Color.WHITE);
         confirmBtn.addActionListener(e -> {
-            // 1) Finaliser la commande (total + valider = 1)
+
             commandeDAO.finaliserCommande(commandeId, total);
-            // 2) Laisser l’historique (panierDAO.viderPanierCommande si vous préférez)
-            // 3) Message et retour à l’accueil
+
             JOptionPane.showMessageDialog(
                     this,
                     "Paiement de " + NumberFormat.getCurrencyInstance().format(total)
@@ -65,6 +84,7 @@ public class Paiementbis extends JFrame {
                     "Confirmation",
                     JOptionPane.INFORMATION_MESSAGE
             );
+
             dispose();
             new PagePrincipale().setVisible(true);
         });
@@ -73,15 +93,23 @@ public class Paiementbis extends JFrame {
         setVisible(true);
     }
 
-    /** Calcule le total avec remise 2 offerts tous les 10. */
+    /**
+     * Calcule le total de la commande avec remise.
+     * <p>
+     * Applique la promotion pour chaque article du panier.
+     * </p>
+     *
+     * @return Le montant total après remises
+     */
     private double calculerTotalAvecRemise() {
         List<Panier> lignes = panierDAO.getPanier(commandeId);
         double total = 0;
+
         for (Panier p : lignes) {
-            double prix     = p.getPrix();
-            int    qte      = p.getQuantite();
-            int    offres   = (qte / 10) * 2;
-            int    factures= qte - offres;
+            double prix = p.getPrix();
+            int qte = p.getQuantite();
+            int offres = (qte / 10);
+            int factures = qte - offres;
             total += factures * prix;
         }
         return total;
