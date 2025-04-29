@@ -9,6 +9,8 @@ import java.util.List;
 import Utilitaires.ConnectionFactory;
 import Modele.Panier;
 
+import javax.swing.*;
+
 /**
  * DAO (Data Access Object) pour la gestion du panier
  * <p>
@@ -27,12 +29,34 @@ public class PanierDAO {
      * @param articleId l'identifiant de l'article à ajouter ou mettre à jour
      * @param quantite la quantité à ajouter
      */
-    public void ajouterProduit(int commandeId, int articleId, int quantite) {
+
+    public int ajouterProduit(int commandeId, int articleId, int quantite) {
         String checkSql  = "SELECT quantite FROM panier WHERE commande_id = ? AND article_id = ?";
         String updateSql = "UPDATE panier SET quantite = ? WHERE commande_id = ? AND article_id = ?";
         String insertSql = "INSERT INTO panier (commande_id, article_id, quantite) VALUES (?, ?, ?)";
+        String stockSql  = "SELECT stock FROM articles WHERE id = ?";
+        String decrementStockSql = "UPDATE articles SET stock = stock - ? WHERE id = ?";
 
         try (Connection conn = ConnectionFactory.getConnection()) {
+
+            int stockDisponible = 0;
+            try (PreparedStatement psStock = conn.prepareStatement(stockSql)) {
+                psStock.setInt(1, articleId);
+                try (ResultSet rsStock = psStock.executeQuery()) {
+                    if (rsStock.next()) {
+                        stockDisponible = rsStock.getInt("stock");
+                    }
+                }
+            }
+
+            if (stockDisponible < quantite) {
+                JOptionPane.showMessageDialog(null,
+                        "Stock insuffisant pour l'article sélectionné (disponible : " + stockDisponible + ")",
+                        "Erreur de stock",
+                        JOptionPane.ERROR_MESSAGE);
+                return 1;
+            }
+
             try (PreparedStatement ps = conn.prepareStatement(checkSql)) {
                 ps.setInt(1, commandeId);
                 ps.setInt(2, articleId);
@@ -45,20 +69,34 @@ public class PanierDAO {
                             psUpd.setInt(3, articleId);
                             psUpd.executeUpdate();
                         }
-                        return;
+                    } else {
+                        try (PreparedStatement psIns = conn.prepareStatement(insertSql)) {
+                            psIns.setInt(1, commandeId);
+                            psIns.setInt(2, articleId);
+                            psIns.setInt(3, quantite);
+                            psIns.executeUpdate();
+                        }
                     }
                 }
             }
-            try (PreparedStatement psIns = conn.prepareStatement(insertSql)) {
-                psIns.setInt(1, commandeId);
-                psIns.setInt(2, articleId);
-                psIns.setInt(3, quantite);
-                psIns.executeUpdate();
+
+            try (PreparedStatement psDec = conn.prepareStatement(decrementStockSql)) {
+                psDec.setInt(1, quantite);
+                psDec.setInt(2, articleId);
+                psDec.executeUpdate();
             }
+
         } catch (SQLException ex) {
             ex.printStackTrace();
+            JOptionPane.showMessageDialog(null,
+                    "Une erreur s'est produite : " + ex.getMessage(),
+                    "Erreur SQL",
+                    JOptionPane.ERROR_MESSAGE);
         }
+        return 0;
     }
+
+
 
     /**
      * Récupère tous les articles du panier pour une commande spécifique.
@@ -101,15 +139,37 @@ public class PanierDAO {
      * @param id l'identifiant de la ligne dans le panier
      */
     public void supprimerArticle(int id) {
-        String sql = "DELETE FROM panier WHERE id = ?";
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, id);
-            ps.executeUpdate();
+        String selectSql = "SELECT article_id, quantite FROM panier WHERE id = ?";
+        String deleteSql = "DELETE FROM panier WHERE id = ?";
+        String updateStockSql = "UPDATE articles SET stock = stock + ? WHERE id = ?";
+
+        try (Connection conn = ConnectionFactory.getConnection()) {
+            try (PreparedStatement psSelect = conn.prepareStatement(selectSql)) {
+                psSelect.setInt(1, id);
+                try (ResultSet rs = psSelect.executeQuery()) {
+                    if (rs.next()) {
+                        int articleId = rs.getInt("article_id");
+                        int quantite = rs.getInt("quantite");
+
+                        try (PreparedStatement psUpdateStock = conn.prepareStatement(updateStockSql)) {
+                            psUpdateStock.setInt(1, quantite);
+                            psUpdateStock.setInt(2, articleId);
+                            psUpdateStock.executeUpdate();
+                        }
+                    }
+                }
+            }
+
+            try (PreparedStatement psDelete = conn.prepareStatement(deleteSql)) {
+                psDelete.setInt(1, id);
+                psDelete.executeUpdate();
+            }
+
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
     }
+
 
     /**
      * Vide la totalité du panier d'une commande donnée
@@ -117,14 +177,35 @@ public class PanierDAO {
      * @param commandeId l'identifiant de la commande
      */
     public void viderPanierCommande(int commandeId) {
+        String selectSql = "SELECT article_id, quantite FROM panier WHERE commande_id = ?";
+        String deleteSql = "DELETE FROM panier WHERE commande_id = ?";
+        String updateStockSql = "UPDATE articles SET stock = stock + ? WHERE id = ?";
+
         try (Connection conn = ConnectionFactory.getConnection()) {
-            String sql = "DELETE FROM panier WHERE commande_id = ?";
-            try (PreparedStatement ps = conn.prepareStatement(sql)) {
-                ps.setInt(1, commandeId);
-                ps.executeUpdate();
+            try (PreparedStatement psSelect = conn.prepareStatement(selectSql)) {
+                psSelect.setInt(1, commandeId);
+                try (ResultSet rs = psSelect.executeQuery()) {
+                    while (rs.next()) {
+                        int articleId = rs.getInt("article_id");
+                        int quantite = rs.getInt("quantite");
+
+                        try (PreparedStatement psUpdateStock = conn.prepareStatement(updateStockSql)) {
+                            psUpdateStock.setInt(1, quantite);
+                            psUpdateStock.setInt(2, articleId);
+                            psUpdateStock.executeUpdate();
+                        }
+                    }
+                }
             }
+
+            try (PreparedStatement psDelete = conn.prepareStatement(deleteSql)) {
+                psDelete.setInt(1, commandeId);
+                psDelete.executeUpdate();
+            }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+
 }

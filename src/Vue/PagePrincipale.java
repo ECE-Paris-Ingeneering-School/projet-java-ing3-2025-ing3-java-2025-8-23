@@ -205,13 +205,15 @@ public class PagePrincipale extends JFrame {
 
                     if (choix == JOptionPane.OK_OPTION) {
                         int qte = (int) spinner.getValue();
-                        panierDAO.ajouterProduit(commandeId, article.getId(), qte);
-                        JOptionPane.showMessageDialog(
-                                null,
-                                article.getNom() + " x" + qte + " ajouté(s) à votre panier.",
-                                "Panier mis à jour",
-                                JOptionPane.INFORMATION_MESSAGE
-                        );
+                        int disponible = panierDAO.ajouterProduit(commandeId, article.getId(), qte);
+                        if (disponible == 0) {
+                            JOptionPane.showMessageDialog(
+                                    null,
+                                    article.getNom() + " x" + qte + " ajouté(s) à votre panier.",
+                                    "Panier mis à jour",
+                                    JOptionPane.INFORMATION_MESSAGE
+                            );
+                        }
                     }
                 }
             });

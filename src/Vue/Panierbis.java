@@ -123,15 +123,14 @@ public class Panierbis extends JFrame {
         for (Panier item : liste) {
             double prixUnitaire = item.getPrix();
             int    qteTotale    = item.getQuantite();
-            // remise tous les 10 => 2 offerts
-            int    offres      = (qteTotale / 10) * 2;
+            int    offres      = (qteTotale / 10);
             int    facturables = qteTotale - offres;
             double sousTotal   = facturables * prixUnitaire;
             total += sousTotal;
 
             String txtSous = String.format("%.2f €", sousTotal);
             if (offres > 0) {
-                txtSous += String.format("  (offerts: %d)", offres);
+                txtSous += String.format("  (offert(s): %d)", offres);
             }
 
             model.addRow(new Object[]{

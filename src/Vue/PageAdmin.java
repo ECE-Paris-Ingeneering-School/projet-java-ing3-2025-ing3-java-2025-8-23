@@ -3,6 +3,7 @@ package Vue;
 import DAO.ArticlesDAO;
 import DAO.CommandeDAO;
 import DAO.PanierDAO;
+import DAO.StatistiquesDAO;
 import Modele.Article;
 import Modele.Commande;
 import Modele.Panier;
@@ -24,6 +25,7 @@ import java.util.List;
  * @author groupe 23 TD8
  */
 public class PageAdmin extends JFrame {
+    private StatistiquesDAO statsDAO = new StatistiquesDAO();
     private JTabbedPane onglets;
 
     private JTable tabArticles;
@@ -51,6 +53,8 @@ public class PageAdmin extends JFrame {
         initClientsTab();
         onglets.addTab("Inventaire", null, buildInventairePanel());
         onglets.addTab("Clients", null, buildClientsPanel());
+        onglets.addTab("Statistiques", null, buildStatsPanel());
+
 
         add(onglets, BorderLayout.CENTER);
 
@@ -324,4 +328,39 @@ public class PageAdmin extends JFrame {
             });
         }
     }
+
+    /**
+     * Construit le panneau affichant les statistiques de ventes par article.
+     *
+     * Ce panneau affiche pour chaque article le nombre total d'unités vendues et
+     * le chiffre d'affaires généré, sous forme de tableau non éditable.
+     *
+     * @return Un JPanel contenant la table des statistiques.
+     */
+    
+    private JPanel buildStatsPanel() {
+        JPanel pnl = new JPanel(new BorderLayout(10,10));
+        pnl.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+
+        String[] colonnes = {"Article", "Quantité vendue", "Total généré (€)"};
+        DefaultTableModel modelStats = new DefaultTableModel(colonnes, 0) {
+            @Override
+            public boolean isCellEditable(int row, int col) {
+                return false;
+            }
+        };
+        JTable tabStats = new JTable(modelStats);
+        pnl.add(new JScrollPane(tabStats), BorderLayout.CENTER);
+
+        for (StatistiquesDAO.StatistiqueArticle stat : statsDAO.getStatistiquesArticles()) {
+            modelStats.addRow(new Object[]{
+                    stat.getNom(),
+                    stat.getQuantiteTotale(),
+                    String.format("%.2f", stat.getTotalGenere())
+            });
+        }
+
+        return pnl;
+    }
+
 }
